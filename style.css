@@ -22,3 +22,8 @@
 #table-of-contents-content {
   overflow-x: hidden;
 }
+
+/* Fix pagination buttons from being all-caps */
+#pagination .uppercase {
+  text-transform: none !important;
+}
