@@ -22,3 +22,8 @@
 #table-of-contents-content {
   overflow-x: hidden;
 }
+
+/* Fix prev/next navigation buttons from being all-caps */
+nav a span {
+  text-transform: none !important;
+}
