@@ -1,0 +1,60 @@
+---
+title: "ESMFoldResult"
+description: "Stores statistics from the ESMFold folding algorithm."
+---
+
+## Attributes
+
+<ResponseField name="input_chains" type="list[Chain]">
+</ResponseField>
+
+<ResponseField name="structure" type="AtomArray">
+</ResponseField>
+
+<ResponseField name="local_plddt" type="npt.NDArray[np.float64]">
+</ResponseField>
+
+<ResponseField name="ptm" type="npt.NDArray[np.float64]">
+</ResponseField>
+
+<ResponseField name="pae" type="npt.NDArray[np.float64]">
+</ResponseField>
+
+## Methods
+
+### validate_score_array
+
+**Parameters**
+
+<ResponseField name="array" type="npt.NDArray[np.float64]" required>
+</ResponseField>
+
+<ResponseField name="field_name" type="str" required>
+</ResponseField>
+
+### validate_local_plddt
+
+**Parameters**
+
+<ResponseField name="v" type="npt.NDArray[np.float64]" required>
+</ResponseField>
+
+### validate_ptm
+
+**Parameters**
+
+<ResponseField name="v" type="npt.NDArray[np.float64]" required>
+</ResponseField>
+
+### save_attributes
+
+**Parameters**
+
+<ResponseField name="filepath" type="pl.Path" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

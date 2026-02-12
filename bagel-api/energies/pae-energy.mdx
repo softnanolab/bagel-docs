@@ -1,0 +1,45 @@
+---
+title: "PAEEnergy"
+description: "Energy that drives down the uncertainty in the predicted distances between two groups of residues. This uncertainty is measured by calculating the average normalised predicted alignment error of all the relevant residue pairs."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[list[Residue]]" required>
+  Which residues to include in the first and second group.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="cross_term_only" type="bool" default="True">
+  Whether to only consider the uncertainty in distance between group 1 and group 2 atoms. If set to False, also considers the uncertainty in distances between atoms within the same group.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

@@ -1,0 +1,76 @@
+---
+title: "State"
+description: "A State is a multimeric collection of `Chain` objects with associated `EnergyTerm` objects. Chains can be independent of other States, or be shared between multiple States."
+---
+
+## Parameters
+
+<ResponseField name="name" type="str" required>
+  Unique identifier for this State.
+</ResponseField>
+
+<ResponseField name="chains" type="List[Chain]" required>
+  List of single monomeric Chains in this State.
+</ResponseField>
+
+<ResponseField name="energy_terms" type="List[EnergyTerm]" required>
+  Collection of EnergyTerms that define the State.
+</ResponseField>
+
+## Methods
+
+### oracles_list
+
+### total_sequence
+
+### energy
+
+Total weighted energy of state. Raises ValueError if no energy terms defined.
+
+### energy_term_values
+
+Unweighted energy term values. Raises ValueError if no energy terms defined.
+
+### total_residues
+
+### remove_residue_from_all_energy_terms
+
+Remove the residue from the energy terms associated to it in the current state.
+
+**Parameters**
+
+<ResponseField name="chain_ID" type="str" required>
+</ResponseField>
+
+<ResponseField name="residue_index" type="int" required>
+</ResponseField>
+
+### add_residue_to_all_energy_terms
+
+You look within the same chain and the same state and you add the residue to the same energy terms the neighbours are part of. You actually look left and right, and randomly decide between the two. If the residue is at the beginning or at the end of the chain, you just look at one of them. You do it for all terms that are inheritable.
+
+**Parameters**
+
+<ResponseField name="chain_ID" type="str" required>
+  ID of the chain where the residue was added
+</ResponseField>
+
+<ResponseField name="residue_index" type="int" required>
+  Index of the newly added residue
+</ResponseField>
+
+<ResponseField name="parent_residue_index" type="int | None" default="None">
+  If provided, use this as the parent residue index (deterministic path). If None, randomly choose between left and right neighbor (usual, default, inference path).
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="int | None">
+  Index of the parent residue None if the chain is not found in this state
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

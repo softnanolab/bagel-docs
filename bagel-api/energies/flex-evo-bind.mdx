@@ -1,0 +1,56 @@
+---
+title: "FlexEvoBindEnergy"
+description: "Energy that minimizes the 'average minimum distance' between two groups of residues. In practice, for each residue in the first group, it finds the closest residue in the second group and calculates the minimum distance between them. The minimum is over all possible pairs of atoms that make up the two residues. The average is over all the residues in the first group. Symmetrise this operation by doing the same but looking at residues from group 2 and what is their minimum distance when looking at residues to group one."
+---
+
+This energy is a symmetrised version of the minimum separation component of the loss used to design peptide binders in:
+'Li, Q., Vlachos, E.N. & Bryant, P. Design of linear and cyclic peptide binders from protein sequence information. Commun Chem 8, 211 (2025)'
+DOI https://doi.org/10.1038/s42004-025-01601-3
+
+Note in this reference the explanation of Eq.1 is misleading. Here, the average of the minimum distance
+is over all the the residues in the first group.
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="tuple[list[Residue], list[Residue]]" required>
+  A tuple containing two lists of residues, those to include in the first [0] and second [1] group.
+</ResponseField>
+
+<ResponseField name="plddt_weighted" type="bool" default="False">
+  A bool indicating whether the result need to be weighted by the plddt of the residues considered. If True, this definition is closer to the EvoBind energy in the reference below
+</ResponseField>
+
+<ResponseField name="symmetrized" type="bool" default="True">
+  A bool indicating whether or not the calculation of the minimum distances need to be symmetrized between residues in residued[0] and those in residues[1]. Otherwise the minimum distances are those between any atom in residues from residues[0] and those in residues in residues[1], but not vice versa.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

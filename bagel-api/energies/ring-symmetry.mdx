@@ -1,0 +1,45 @@
+---
+title: "RingSymmetryEnergy"
+description: "Energy that maximises the symmetry of different groups. Symmetry is measured by finding the centroid of the backbone of each group and checking how consistently they are spaced from one another."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="symmetry_groups" type="list[list[Residue]]" required>
+  A list of at least length 2, with each element containing a list of residues corresponding to a symmetry group.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="direct_neighbours_only" type="bool" default="False">
+  Whether to compare the spacing of each each group to its direct neighbour (compare group i to group i+1 only), or each group to all other groups. Defaults to the latter.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

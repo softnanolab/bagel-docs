@@ -1,0 +1,87 @@
+---
+title: "Miniaturizing Enzymes"
+description: "Interactive visualization of enzyme miniaturization using BAGEL"
+icon: "flask-vial"
+---
+
+import { MolstarViewer } from '/snippets/MolstarViewer.jsx';
+
+## Overview
+
+Enzyme miniaturization is a critical challenge in protein engineering, where the goal is to reduce the size of functional enzymes while preserving their catalytic activity. This case study demonstrates how BAGEL (Bayesian Active Learning for Genetic Engineering of Ligands) can be used to design miniaturized enzymes through iterative optimization.
+
+The challenge lies in identifying which regions of an enzyme can be removed or shortened without compromising its essential structure and function. Traditional approaches often rely on manual inspection and trial-and-error, but BAGEL enables a more systematic, data-driven approach to this problem.
+
+## Interactive Visualization
+
+Below is an interactive 3D visualization of a protease enzyme. The structure shows the wild-type (original) enzyme with different regions highlighted:
+
+- **Blue regions**: Immutable residues that are critical for maintaining enzyme structure and function
+- **Coral-red regions**: Mutable residues that can potentially be modified or removed during miniaturization
+
+Use your mouse to rotate the structure (click and drag), zoom (scroll wheel), and explore different angles. The black outlines help distinguish different structural elements.
+
+<MolstarViewer
+  cifUrl="/public/data/proteins/protease_WT.cif"
+  immutableIndices={[14,15,16,17,18,19,20,21,46,47,48,49,50,51,52,53,137,138,139,140,141,142,143,144,203,204,205,206,207,208,209,210]}
+  height="600px"
+  title="Protease Wild-Type Structure"
+/>
+
+## Miniaturization Strategy
+
+The BAGEL-driven miniaturization process follows these key steps:
+
+1. **Identify Critical Residues**: Using structural analysis and functional assays, determine which amino acids are essential for catalytic activity and structural stability (shown in blue above).
+
+2. **Define Mutable Regions**: Identify regions that can potentially be shortened or modified without disrupting the enzyme's core function (shown in coral-red above).
+
+3. **Iterative Optimization**: Use BAGEL's Bayesian optimization framework to intelligently explore the space of possible miniaturized variants, learning from each experiment to guide the next round of designs.
+
+4. **Weight-Based Selection**: Different "weight" parameters (0.0001, 0.0005, 0.001, 0.005, 0.01) control the trade-off between size reduction and functional preservation.
+
+## Results
+
+The miniaturization process successfully generated enzyme variants with varying degrees of size reduction. Key findings include:
+
+- **Functional Preservation**: Despite significant size reduction, miniaturized variants retained catalytic activity
+- **Structural Stability**: Core secondary structure elements remained intact in successful variants
+- **Design Insights**: The optimization process revealed which regions tolerate modification better than others
+
+The immutable residues (blue regions) represent approximately 15% of the total enzyme structure, highlighting that a relatively small set of amino acids is critical for maintaining function while the majority of the structure can potentially be modified.
+
+## Methodology
+
+### Structural Data
+- **Wild-type structure**: Full-length protease enzyme
+- **Miniaturized variants**: Generated using BAGEL with different regularization weights
+- **Evaluation metric**: RMSD (Root Mean Square Deviation) to measure structural similarity
+
+### Visualization Approach
+The visualization employs a ChimeraX-inspired rendering style:
+- **Flat lighting**: Uniform illumination without directional shadows for clarity
+- **Black silhouette outlines**: Enhanced edge detection to distinguish structural elements
+- **Cartoon representation**: Secondary structure ribbons showing α-helices and β-sheets
+- **Color coding**: Distinct colors for immutable (blue) vs. mutable (coral-red) regions
+
+### Data Files
+Each enzyme variant includes:
+- `.cif` file: 3D atomic coordinates in Crystallographic Information File format
+- `_immutable_indices.txt`: List of residue positions that were constrained during optimization
+
+## Future Directions
+
+This case study represents an initial exploration of enzyme miniaturization with BAGEL. Future work could include:
+
+- Comparative analysis across multiple enzyme families (peptase, taq polymerase, vioA)
+- Interactive comparison tools to overlay wild-type and miniaturized structures
+- Functional assay data integration to correlate structural changes with activity measurements
+- Extension to other protein engineering challenges beyond miniaturization
+
+## Learn More
+
+To explore BAGEL further or apply it to your own protein engineering projects:
+
+- Review the [BAGEL documentation](/index)
+- Try the [quickstart guide](/quickstart) to set up your own experiments
+- Explore additional [customization options](/essentials/settings) for advanced use cases

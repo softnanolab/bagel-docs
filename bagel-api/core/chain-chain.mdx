@@ -1,0 +1,96 @@
+---
+title: "Chain"
+description: "Encodes residues and mutability of a monomeric chain, with functionality to read, write, and mutate the chain."
+---
+
+## Parameters
+
+<ResponseField name="residues" type="List[Residue]" required>
+  List of Residue objects
+</ResponseField>
+
+## Methods
+
+### chain_ID
+
+ID of the monomer chain.
+
+### mutability
+
+List of mutability of each Residue in Chain.
+
+### sequence
+
+String (one-letter) representation of amino acids in Chain.
+
+### mutable_residues
+
+List of mutable Residues in Chain
+
+### mutable_residue_indexes
+
+List of the indexes of mutable Residues in Chain
+
+### length
+
+Number of amino acids in Chain.
+
+### from_pdb
+
+Create Chain object from a PDB file string. Residue indices are 0-indexed.
+
+**Parameters**
+
+<ResponseField name="file_path" type="str" required>
+</ResponseField>
+
+<ResponseField name="chain_id" type="str" required>
+</ResponseField>
+
+### from_cif
+
+Create Chain object from a CIF file string.
+
+**Parameters**
+
+<ResponseField name="cif_data" type="str" required>
+</ResponseField>
+
+### remove_residue
+
+Remove the Residue at the given index (0-indexed).
+
+**Parameters**
+
+<ResponseField name="index" type="int" required>
+</ResponseField>
+
+### add_residue
+
+Add a Residue of type amino_acid at the position specified by index (0-indexed).
+
+**Parameters**
+
+<ResponseField name="amino_acid" type="str" required>
+</ResponseField>
+
+<ResponseField name="index" type="int" required>
+</ResponseField>
+
+### mutate_residue
+
+Change identity of Residue at position specified by index to 'amino_acid'
+
+**Parameters**
+
+<ResponseField name="index" type="int" required>
+</ResponseField>
+
+<ResponseField name="amino_acid" type="str" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

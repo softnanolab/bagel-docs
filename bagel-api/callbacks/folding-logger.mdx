@@ -1,0 +1,36 @@
+---
+title: "FoldingLogger"
+description: "Logger that saves CIF structures and oracle attributes for a specific FoldingOracle instance."
+---
+
+## Parameters
+
+<ResponseField name="folding_oracle" type="FoldingOracle" required>
+  The FoldingOracle instance to log (e.g. an ESMFold instance).
+</ResponseField>
+
+<ResponseField name="log_interval" type="int" required>
+  Interval (in steps) at which to log structures for the current system.
+</ResponseField>
+
+## Methods
+
+### on_optimization_start
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+### on_step_end
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

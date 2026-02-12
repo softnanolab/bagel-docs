@@ -1,11 +1,17 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "linden",
+  "name": "BAGEL",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#5078D0",
+    "light": "#5078D0",
+    "dark": "#5078D0"
+  },
+  "background": {
+    "color": {
+      "light": "#f5f4e9",
+      "dark": "#0f0f0f"
+    }
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -48,56 +54,111 @@
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "BAGEL API",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
+            "pages": ["bagel-api/overview"]
+          },
+          {
+            "group": "Core",
             "pages": [
-              "api-reference/introduction"
+              "bagel-api/core/chain",
+              "bagel-api/core/chain-chain",
+              "bagel-api/core/state",
+              "bagel-api/core/system"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Energies",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "bagel-api/energies/energy-term",
+              "bagel-api/energies/ptm-energy",
+              "bagel-api/energies/chemical-potential",
+              "bagel-api/energies/plddt-energy",
+              "bagel-api/energies/overall-plddt",
+              "bagel-api/energies/surface-area",
+              "bagel-api/energies/hydrophobic",
+              "bagel-api/energies/pae-energy",
+              "bagel-api/energies/lis-energy",
+              "bagel-api/energies/ring-symmetry",
+              "bagel-api/energies/separation",
+              "bagel-api/energies/flex-evo-bind",
+              "bagel-api/energies/globular",
+              "bagel-api/energies/template-match",
+              "bagel-api/energies/secondary-structure",
+              "bagel-api/energies/embeddings-similarity"
+            ]
+          },
+          {
+            "group": "Minimizers",
+            "pages": [
+              "bagel-api/minimizer/minimizer",
+              "bagel-api/minimizer/monte-carlo",
+              "bagel-api/minimizer/simulated-annealing",
+              "bagel-api/minimizer/simulated-tempering"
+            ]
+          },
+          {
+            "group": "Mutation",
+            "pages": [
+              "bagel-api/mutation/mutation",
+              "bagel-api/mutation/mutation-record",
+              "bagel-api/mutation/mutation-protocol",
+              "bagel-api/mutation/canonical",
+              "bagel-api/mutation/grand-canonical"
+            ]
+          },
+          {
+            "group": "Oracles",
+            "pages": [
+              "bagel-api/oracles/oracle",
+              "bagel-api/oracles/oracle-result",
+              "bagel-api/oracles/oracles-result-dict",
+              "bagel-api/oracles/folding-oracle",
+              "bagel-api/oracles/folding-result",
+              "bagel-api/oracles/esmfold",
+              "bagel-api/oracles/esmfold-result",
+              "bagel-api/oracles/embedding-oracle",
+              "bagel-api/oracles/embedding-result",
+              "bagel-api/oracles/esm2",
+              "bagel-api/oracles/esm2-result"
+            ]
+          },
+          {
+            "group": "Callbacks",
+            "pages": [
+              "bagel-api/callbacks/callback",
+              "bagel-api/callbacks/callback-context",
+              "bagel-api/callbacks/callback-manager",
+              "bagel-api/callbacks/default-logger",
+              "bagel-api/callbacks/folding-logger",
+              "bagel-api/callbacks/early-stopping",
+              "bagel-api/callbacks/wandb-logger"
+            ]
+          },
+          {
+            "group": "Analysis",
+            "pages": [
+              "bagel-api/analysis/analyzer",
+              "bagel-api/analysis/simulated-tempering-analyzer"
             ]
           }
         ]
       }
     ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    "global": {}
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/bagel-logo.png",
+    "dark": "/logo/bagel-logo.png"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
+    "links": [],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "⚠️ Work in Progress",
+      "href": "#"
     }
   },
   "contextual": {

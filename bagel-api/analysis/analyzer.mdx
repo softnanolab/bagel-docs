@@ -1,0 +1,34 @@
+---
+title: "MonteCarloAnalyzer"
+description: ""
+---
+
+## Parameters
+
+<ResponseField name="path" type="str" required>
+</ResponseField>
+
+## Methods
+
+### plot_energies
+
+Plot the evolution of system energy together with individual energy terms.
+
+**Parameters**
+
+<ResponseField name="weighted" type="bool" default="True">
+  If True, multiply individual energy terms by their configured weights before plotting.
+</ResponseField>
+
+<ResponseField name="use_best" type="bool" default="False">
+  If True, plot the best energies; otherwise plot the current energies.
+</ResponseField>
+
+<ResponseField name="ax" type="plt.Axes" default="None">
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

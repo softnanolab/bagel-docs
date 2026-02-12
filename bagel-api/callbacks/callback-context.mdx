@@ -1,0 +1,40 @@
+---
+title: "CallbackContext"
+description: "Container for all information passed to callbacks during optimization."
+---
+
+## Parameters
+
+<ResponseField name="step" type="int" required>
+  Current step number. Step 0 = before optimization; steps 1..N = after each optimization step (1-indexed).
+</ResponseField>
+
+<ResponseField name="system" type="System" required>
+  Current system state after the step.
+</ResponseField>
+
+<ResponseField name="best_system" type="System" required>
+  Best system found so far during optimization.
+</ResponseField>
+
+<ResponseField name="new_best" type="bool" required>
+  Whether this step found a new best system.
+</ResponseField>
+
+<ResponseField name="metrics" type="dict[str, float]" required>
+  Extracted energy metrics including: - 'system_energy': Total energy of current system - 'best_system_energy': Total energy of best system - '{state.name}/{energy_name}': Individual energy term values - '{state.name}/state_energy': Total energy per state
+</ResponseField>
+
+<ResponseField name="minimizer" type="Minimizer" required>
+  Reference to the minimizer instance running the optimization.
+</ResponseField>
+
+<ResponseField name="step_kwargs" type="dict[str, Any]" required>
+  Step-specific keyword arguments (e.g., temperature, accept).
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

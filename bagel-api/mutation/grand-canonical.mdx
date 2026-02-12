@@ -1,0 +1,56 @@
+---
+title: "GrandCanonical"
+description: "Grand canonical mutation protocol, making a substitution, addition or removal at random n residues."
+---
+
+## Parameters
+
+<ResponseField name="n_mutations" type="int" default="1">
+  Number of mutations to perform in each step.
+</ResponseField>
+
+<ResponseField name="mutation_bias" type="Dict[str, float]" default="mutation_bias_no_cystein">
+  Bias for the substitution. The keys are the amino acids, the values are the probabilities.
+</ResponseField>
+
+<ResponseField name="move_probabilities" type="dict[str, float]" default="{'substitution': 0.5, 'addition': 0.25, 'removal': 0.25}">
+  Probabilities for the different moves. The keys are 'substitution', 'addition', and 'removal', and the values are the probabilities of performing the corresponding move. These should be normalized to sum to 1.
+</ResponseField>
+
+<ResponseField name="exclude_self" type="bool" default="True">
+</ResponseField>
+
+## Methods
+
+### remove_random_residue
+
+**Parameters**
+
+<ResponseField name="chain" type="Chain" required>
+</ResponseField>
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+### add_random_residue
+
+**Parameters**
+
+<ResponseField name="chain" type="Chain" required>
+</ResponseField>
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+### one_step
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

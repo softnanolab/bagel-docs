@@ -1,0 +1,39 @@
+---
+title: "ESMFold"
+description: "Object that uses ESMFold to predict structure of proteins from sequence."
+---
+
+WIP: For now we will be using ModalFold to do this reliably without much env issues.
+
+## Parameters
+
+<ResponseField name="use_modal" type="bool" default="False">
+</ResponseField>
+
+<ResponseField name="config" type="dict[str, Any]" default="{}">
+</ResponseField>
+
+<ResponseField name="modal_app_context" type="App | None" default="None">
+</ResponseField>
+
+## Attributes
+
+<ResponseField name="result_class" type="Type[ESMFoldResult]">
+</ResponseField>
+
+## Methods
+
+### fold
+
+Fold a list of chains using ESMFold.
+
+**Parameters**
+
+<ResponseField name="chains" type="List[Chain]" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

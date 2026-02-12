@@ -1,0 +1,52 @@
+---
+title: "SimulatedTempering"
+description: "Simulated tempering with cycling temperature schedule."
+---
+
+## Parameters
+
+<ResponseField name="mutator" type="MutationProtocol" required>
+</ResponseField>
+
+<ResponseField name="high_temperature" type="float" required>
+</ResponseField>
+
+<ResponseField name="low_temperature" type="float" required>
+</ResponseField>
+
+<ResponseField name="n_steps_high" type="int" required>
+</ResponseField>
+
+<ResponseField name="n_steps_low" type="int" required>
+</ResponseField>
+
+<ResponseField name="n_cycles" type="int" required>
+</ResponseField>
+
+<ResponseField name="acceptance_criterion" type="str" default="'metropolis'">
+</ResponseField>
+
+<ResponseField name="experiment_name" type="str | None" default="None">
+</ResponseField>
+
+<ResponseField name="log_frequency" type="int" default="100">
+</ResponseField>
+
+<ResponseField name="preserve_best_system_every_n_steps" type="int | None" default="None">
+</ResponseField>
+
+<ResponseField name="log_path" type="pl.Path | str | None" default="None">
+</ResponseField>
+
+<ResponseField name="callbacks" type="list['Callback'] | None" default="None">
+</ResponseField>
+
+<ResponseField name="**kwargs" type="Any">
+  Additional keyword arguments.
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

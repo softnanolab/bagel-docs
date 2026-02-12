@@ -1,0 +1,50 @@
+---
+title: "EmbeddingsSimilarityEnergy"
+description: "Energy terms measuring the cosine similarity between current embeddings and embeddings of a template. See paper: Rajendran et al. 2025 - to be published"
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="EmbeddingOracle" required>
+  The oracle that will be used to calculate the embeddings.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue]" required>
+  Which residues to include in the calculation.
+</ResponseField>
+
+<ResponseField name="reference_embeddings" type="npt.NDArray[np.float64]" required>
+  The reference embeddings to compare to.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+### conserved_index_list
+
+Returns the indices of the conserved residues (stored in .residue_group[0]) in the pLM embedding array.
+
+**Parameters**
+
+<ResponseField name="chains" type="list[Chain]" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

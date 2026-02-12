@@ -1,0 +1,45 @@
+---
+title: "SecondaryStructureEnergy"
+description: "Energy that drives the secondary structure of the selected residues to a given type. Calculated by finding the fraction of selected residues with the wrong secondary structure. Secondary structure types include alpha-helix, beta-sheet, and coil."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="Oracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue]" required>
+  Which residues to include in the calculation.
+</ResponseField>
+
+<ResponseField name="target_secondary_structure" type="str" required>
+  Which secondary structure type to drive towards. Options are 'alpha-helix', 'beta-sheet', or 'coil'.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

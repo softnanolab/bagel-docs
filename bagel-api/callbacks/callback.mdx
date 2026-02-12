@@ -1,0 +1,51 @@
+---
+title: "Callback"
+description: "Abstract base class for callbacks in the optimization process."
+---
+
+Callbacks can be used to monitor, log, or modify the optimization behavior.
+All hook methods have default no-op implementations, so subclasses only need
+to override the methods they care about.
+
+## Methods
+
+### on_optimization_start
+
+Called once before the optimization loop begins.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+  Context containing initial system state and minimizer reference.
+</ResponseField>
+
+### on_step_end
+
+Called after each optimization step.
+
+This is the main hook for monitoring and logging during optimization.
+All callbacks execute even if early stopping is triggered.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+  Context containing current step information, systems, and metrics.
+</ResponseField>
+
+### on_optimization_end
+
+Called once after the optimization loop completes.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+  Context containing final system state and minimizer reference.
+</ResponseField>
+
+## Example
+
+```python
+class MyCallback(Callback):
+    def on_step_end(self, context: CallbackContext) -> None:
+        print(f"Step {context.step}: energy = {context.metrics['system_energy']}")
+```

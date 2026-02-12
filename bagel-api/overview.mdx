@@ -1,0 +1,77 @@
+---
+title: "BAGEL API Overview"
+description: "Python API reference for the BAGEL protein design library."
+---
+
+<Warning>
+🚨 **This documentation is work in progress and should not be referred to.** 🚨
+</Warning>
+
+BAGEL (**B**ayesian **A**lgorithms for **G**enerative **E**ngineering of bio**L**ogical sequences) is a Python library for computational protein design. It finds amino acid sequences that give rise to structures meeting specified design criteria using Monte Carlo optimization.
+
+## Architecture
+
+BAGEL follows a modular architecture with these core concepts:
+
+```
+System
+  └── State(s)
+        ├── Chain(s) → Residue(s)
+        └── EnergyTerm(s) → Oracle(s)
+```
+
+- **System** — Top-level container representing the full design task. Contains one or more States.
+- **State** — A multimeric collection of Chains with associated EnergyTerms. Multiple states can share chains.
+- **Chain** — A monomeric sequence of Residues with mutability controls.
+- **Residue** — A single amino acid with a name, index, and mutability flag.
+- **EnergyTerm** — A scoring function that evaluates how well a structure meets a design criterion. Each term uses an Oracle to get structural predictions.
+- **Oracle** — An algorithm (e.g., ESMFold, ESM-2) that predicts properties from sequence (structure, embeddings).
+
+## Optimization Flow
+
+1. Define your **Chains** with sequences and mutability
+2. Create **States** grouping chains with **EnergyTerms**
+3. Wrap states in a **System**
+4. Choose a **MutationProtocol** (Canonical or GrandCanonical)
+5. Run a **Minimizer** (SimulatedAnnealing, SimulatedTempering) with optional **Callbacks**
+
+## Module Reference
+
+<CardGroup cols={2}>
+  <Card title="Core" icon="cube" href="/bagel-api/core/chain">
+    Residue, Chain, State, System — the fundamental data structures.
+  </Card>
+  <Card title="Energies" icon="bolt" href="/bagel-api/energies/energy-term">
+    EnergyTerm and 15+ built-in scoring functions (pTM, pLDDT, PAE, SASA, etc.).
+  </Card>
+  <Card title="Minimizers" icon="chart-line-down" href="/bagel-api/minimizer/minimizer">
+    Monte Carlo, Simulated Annealing, and Simulated Tempering optimizers.
+  </Card>
+  <Card title="Mutation" icon="shuffle" href="/bagel-api/mutation/mutation-protocol">
+    Canonical (substitution-only) and GrandCanonical (add/remove/substitute) protocols.
+  </Card>
+  <Card title="Oracles" icon="brain" href="/bagel-api/oracles/oracle">
+    Structure prediction (ESMFold) and embedding (ESM-2) oracles.
+  </Card>
+  <Card title="Callbacks" icon="bell" href="/bagel-api/callbacks/callback">
+    Logging, early stopping, structure saving, and W&B integration.
+  </Card>
+  <Card title="Analysis" icon="chart-bar" href="/bagel-api/analysis/analyzer">
+    Post-optimization analysis and visualization tools.
+  </Card>
+</CardGroup>
+
+## Import Patterns
+
+```python
+# Core objects are available at the top level
+from bagel import Chain, Residue, State, System
+
+# Submodules for specialized classes
+from bagel.energies import PTMEnergy, PLDDTEnergy, PAEEnergy
+from bagel.minimizer import SimulatedAnnealing
+from bagel.mutation import Canonical, GrandCanonical
+from bagel.oracles.folding import ESMFold
+from bagel.oracles.embedding import ESM2
+from bagel.callbacks import EarlyStopping, WandBLogger, FoldingLogger
+```

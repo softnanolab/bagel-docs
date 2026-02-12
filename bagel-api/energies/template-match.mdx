@@ -1,0 +1,49 @@
+---
+title: "TemplateMatchEnergy"
+description: "Energy that drives the structure to match an input-provided template. The difference with the template is always calculated by automatically considering the rotation and translation that best maximize the overlap with the template."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="Oracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="template_atoms" type="AtomArray" required>
+  An array of atoms that specify the desired positions of the structure.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue]" required>
+  Which residues in the structure to compare to the template.
+</ResponseField>
+
+<ResponseField name="backbone_only" type="bool" default="False">
+  Whether to only consider backbone atoms in the template and strucutre. Considers all atoms by default.
+</ResponseField>
+
+<ResponseField name="distogram_separation" type="bool" default="False">
+  Whether strucutre - template separation is measured by taking the root mean square of the difference between the two pairwise distance matrices. By default, the root mean square of the difference in positions is used instead.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

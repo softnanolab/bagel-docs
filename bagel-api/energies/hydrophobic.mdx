@@ -1,0 +1,53 @@
+---
+title: "HydrophobicEnergy"
+description: "Energy Proportional to the amount of hydrophobic residues present. This is measured by the fraction of selected atoms that belong to hydrophobic residues (valine, isoleucine, leucine, phenylalanine, methionine, tryptophan)."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue] | None" default="None">
+  Which residues to include in the calculation. If not set, simply considers **all** residues by default.
+</ResponseField>
+
+<ResponseField name="mode" type="Literal['surface', 'core', 'all']" default="'all'">
+  Selection of which atoms contribute to the hydrophobicity score: - 'surface': counts hydrophobic residues at the surface, weighted by normalised SASA - 'core': counts hydrophobic residues in the core, weighted by 1 - normalised SASA - 'all': counts all hydrophobic residues, no SASA weighting Normalisation uses `max_sasa_values['S']` and the probe radius `probe_radius_water`.
+</ResponseField>
+
+<ResponseField name="surface_only" type="bool" default="False">
+  Deprecated. Use `mode='surface'` instead.
+</ResponseField>
+
+<ResponseField name="core_only" type="bool" default="False">
+  Deprecated. Use `mode='core'` instead.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

@@ -1,0 +1,49 @@
+---
+title: "LISEnergy"
+description: "Energy representing the Local Interaction Score [], a function of the PAE matrix."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[list[Residue]]" required>
+  Which residues to include in the first and second group.
+</ResponseField>
+
+<ResponseField name="pae_cutoff" type="float" default="12.0">
+  The cutoff value for the PAE, in Angstroms, below which the interaction is considered "local".
+</ResponseField>
+
+<ResponseField name="intensive" type="bool" default="True">
+  If True, the LIS is averaged over the number of residue pairs, otherwise it's an extensive sum.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

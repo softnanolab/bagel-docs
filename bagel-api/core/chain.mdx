@@ -1,0 +1,36 @@
+---
+title: "Residue"
+description: "Standard amino acid object."
+---
+
+## Parameters
+
+<ResponseField name="name" type="str" required>
+  Type of the amino acid in one-letter format (upper-cased)
+</ResponseField>
+
+<ResponseField name="chain_ID" type="str" required>
+  ID of the polymer chain this residue belongs to
+</ResponseField>
+
+<ResponseField name="index" type="int" required>
+  Internal index of the residue in the chain (0 to len(chain)-1, i.e. 0-indexed)
+</ResponseField>
+
+<ResponseField name="mutable" type="bool" default="True">
+  Whether the residue can be mutated
+</ResponseField>
+
+## Methods
+
+### three_letter_name
+
+String representation of amino acid in 3-letters format.
+
+## Example
+
+```python
+residue = Residue("A", "X", 0)
+residue.three_letter_name
+    'ALA'
+```

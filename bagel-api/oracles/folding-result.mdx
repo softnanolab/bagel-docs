@@ -1,0 +1,36 @@
+---
+title: "FoldingResult"
+description: "Stores statistics from the folding algorithm."
+---
+
+## Attributes
+
+<ResponseField name="input_chains" type="list[Chain]">
+</ResponseField>
+
+<ResponseField name="structure" type="AtomArray">
+</ResponseField>
+
+## Methods
+
+### to_cif
+
+Write the structure to a CIF file.
+
+**Parameters**
+
+<ResponseField name="filepath" type="Path" required>
+  Path to the file to write the CIF structure to.
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="bool">
+  True if the file was written successfully.
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

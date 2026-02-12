@@ -1,0 +1,41 @@
+---
+title: "PLDDTEnergy"
+description: "Predicted Local Distance Difference Test energy. This is the spread of the predicted separation between an atom and each of its nearest neighbours. This translates to how confident the model is that the sequence has a single lowest energy structure, as opposed to a disordered, constantly changing structure. This energy is averaged over the relevant atoms."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue] | None" required>
+  Which residues to include in the calculation.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

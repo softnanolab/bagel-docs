@@ -1,0 +1,56 @@
+---
+title: "System"
+description: "Top level object defining the input for a protein design pipeline. In practice, a system will be a collection of states, each representing a (potentially different) collection of chains."
+---
+
+## Parameters
+
+<ResponseField name="states" type="list[State]" required>
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+</ResponseField>
+
+<ResponseField name="total_energy" type="float | None" default="None">
+</ResponseField>
+
+## Methods
+
+### get_total_energy
+
+### dump_config
+
+Saves information about how each energy term was configured in a csv file named "config.csv". Columns include 'state_name', 'energy_name', and 'weight'.
+
+**Parameters**
+
+<ResponseField name="path" type="pl.Path" required>
+  The directory in which the config.csv file will be created.
+</ResponseField>
+
+### add_chain
+
+Add a chain to the state.
+
+**Parameters**
+
+<ResponseField name="sequence" type="str" required>
+  amino acid sequence of the chain
+</ResponseField>
+
+<ResponseField name="mutability" type="list[int]" required>
+  list of 0s and 1s indicating if the residue is mutable or not
+</ResponseField>
+
+<ResponseField name="chain_ID" type="str" required>
+</ResponseField>
+
+<ResponseField name="state_index" type="list[int]" required>
+  index of the state in the system
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

@@ -1,0 +1,39 @@
+---
+title: "DefaultLogger"
+description: "Default file-based logger for scalar and sequence data."
+---
+
+This logger writes:
+- energies.csv with step, per-state energy terms, per-state total energies, and system_energy
+- per-state FASTA files with sequences
+- per-state mask FASTA files with mutability masks
+
+It does not write structures; use FoldingLogger for structure outputs.
+
+## Parameters
+
+<ResponseField name="log_interval" type="int" required>
+  Interval (in steps) at which to log the current system.
+</ResponseField>
+
+## Methods
+
+### on_optimization_start
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+### on_step_end
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

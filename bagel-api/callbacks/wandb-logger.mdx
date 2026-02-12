@@ -1,0 +1,59 @@
+---
+title: "WandBLogger"
+description: "Callback for logging metrics to Weights & Biases."
+---
+
+Uses environment variables for authentication:
+- WANDB_API_KEY: Your WandB API key (required for online logging)
+- WANDB_ENTITY: Username or team name (optional)
+- WANDB_PROJECT: Project name (optional, overrides constructor project)
+
+If wandb is not installed, this callback will log warnings but not crash.
+
+## Parameters
+
+<ResponseField name="project" type="str" required>
+  WandB project name. Can be overridden by WANDB_PROJECT env var.
+</ResponseField>
+
+<ResponseField name="config" type="dict[str, Any] | None" default="None">
+  Hyperparameters and configuration to log.
+</ResponseField>
+
+## Methods
+
+### on_optimization_start
+
+Initialize WandB run.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+### on_step_end
+
+Log metrics to WandB.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+### on_optimization_end
+
+Finish WandB run.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+## Example
+
+```python
+wandb_logger = WandBLogger(
+    project="protein-design",
+    config={"temperature": 1.0, "n_steps": 1000}
+)
+```

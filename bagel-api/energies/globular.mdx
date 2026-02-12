@@ -1,0 +1,41 @@
+---
+title: "GlobularEnergy"
+description: "Energy proportional to the moment of inertia of the structure around its centroid. This energy is minimized when the atoms belonging to a structure have the lowest possible distance from the centre, and, due to excluded volume effects that prevent collapse to a single point, helps forcing structures to be as close as possible to a spherically distributed cloud of points."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="Oracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue] | None" default="None">
+  Which residues to include in the calculation. Considers all residues by default.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

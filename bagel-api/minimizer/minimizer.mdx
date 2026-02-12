@@ -1,0 +1,100 @@
+---
+title: "Minimizer"
+description: "Base class for energy minimization logic."
+---
+
+## Parameters
+
+<ResponseField name="mutator" type="MutationProtocol" required>
+</ResponseField>
+
+<ResponseField name="experiment_name" type="str" required>
+</ResponseField>
+
+<ResponseField name="log_frequency" type="int" required>
+</ResponseField>
+
+<ResponseField name="log_path" type="pl.Path | str | None" required>
+</ResponseField>
+
+<ResponseField name="callbacks" type="list['Callback'] | None" default="None">
+</ResponseField>
+
+<ResponseField name="**kwargs" type="Any">
+  Additional keyword arguments.
+</ResponseField>
+
+## Methods
+
+### initialize_log_path
+
+Creates folder next to the .py script run named the `self.experiment_name`. Said folder cannot already exist.
+
+**Parameters**
+
+<ResponseField name="log_path" type="None | str | pl.Path" required>
+</ResponseField>
+
+### dump_logs
+
+Dumps logs to CSV file.
+
+**Parameters**
+
+<ResponseField name="output_folder" type="pl.Path" required>
+</ResponseField>
+
+<ResponseField name="step" type="int" required>
+</ResponseField>
+
+### log_initial_system
+
+Logs initial system state.
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+<ResponseField name="best_system" type="System" required>
+</ResponseField>
+
+### log_step
+
+Logs step information.
+
+**Parameters**
+
+<ResponseField name="step" type="int" required>
+</ResponseField>
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+<ResponseField name="best_system" type="System" required>
+</ResponseField>
+
+<ResponseField name="new_best" type="bool" required>
+</ResponseField>
+
+### minimize_system
+
+Implement a protocol to fully minimize the loss function defined for the system.
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+  initial state of the System
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="System">
+  System at the end of minimization
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

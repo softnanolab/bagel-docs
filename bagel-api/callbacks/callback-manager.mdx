@@ -1,0 +1,97 @@
+---
+title: "CallbackManager"
+description: "Manages the execution of callbacks during optimization."
+---
+
+The CallbackManager coordinates callback execution, extracts metrics from
+systems, and handles early stopping signals.
+
+## Parameters
+
+<ResponseField name="callbacks" type="list[Callback] | None" default="None">
+  List of callbacks to execute. If None, an empty list is used.
+</ResponseField>
+
+## Methods
+
+### add_callback
+
+Add a callback to the manager.
+
+**Parameters**
+
+<ResponseField name="callback" type="Callback" required>
+  Callback instance to add.
+</ResponseField>
+
+### extract_metrics
+
+Extract energy metrics from system and best_system.
+
+Extracts:
+- System-level energies: 'system_energy', 'best_system_energy'
+- State-level energy terms: '{state.name}/{energy_name}'
+- State-level total energies: '{state.name}/state_energy'
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+  Current system state.
+</ResponseField>
+
+<ResponseField name="best_system" type="System" required>
+  Best system found so far.
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="dict[str, float]">
+  Dictionary mapping metric names to their values.
+</ResponseField>
+
+### on_optimization_start
+
+Execute on_optimization_start for all registered callbacks.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+  Context containing initial system state.
+</ResponseField>
+
+### on_step_end
+
+Execute on_step_end for all registered callbacks.
+
+All callbacks execute even if one sets the stop flag (Option B from design).
+This ensures logging callbacks can complete their work.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+  Context containing current step information.
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="bool">
+  True if optimization should stop early, False otherwise.
+</ResponseField>
+
+### on_optimization_end
+
+Execute on_optimization_end for all registered callbacks.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+  Context containing final system state.
+</ResponseField>
+
+## Example
+
+```python
+from bagel.callbacks import EarlyStopping, WandBLogger
+callbacks = [EarlyStopping(monitor="best_system_energy", patience=100)]
+manager = CallbackManager(callbacks)
+```

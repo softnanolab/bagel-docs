@@ -1,0 +1,24 @@
+.katex-display {
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
+.katex-display > .katex {
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
+/* Hide horizontal scrollbar and truncate long TOC entries */
+#table-of-contents a,
+#table-of-contents-content a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
+  display: block;
+  max-width: 100%;
+}
+
+#table-of-contents,
+#table-of-contents-content {
+  overflow-x: hidden;
+}

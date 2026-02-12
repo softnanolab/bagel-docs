@@ -1,0 +1,134 @@
+---
+title: "EnergyTerm"
+description: "Standard energy term to build the loss (total energy) function to be minimized. Note that each energy term is a function of the structure and folding metrics. Also, note that each energy term has its own __init__ method, however, all common terms that must be initialized can be found in the __post__init__ function below. Like the __init__ method, __post__init__ is also **automatically** called upon instantiating an object of the class."
+---
+
+EnergyTerms can be inheritable, which is only relevant for `bagel.mutation.GrandCanonical`.
+In that type of simulation when adding a new residues, the "inheritable" attribute decides whether or not
+the new residue will be added to the residues for which this term is calculated. In general, a new residue
+inherits all energy terms of one of its neighbours (chosen randomly to be the left or right neighbour),
+if these terms are inheritable.
+
+## Parameters
+
+<ResponseField name="name" type="str" required>
+  The name of the energy term.
+</ResponseField>
+
+<ResponseField name="oracle" type="Oracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" required>
+  Whether the energy term is inheritable.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+## Methods
+
+### compute
+
+Calculates the EnergyTerm's energy given information about the folded structure. The result is returned and stored as an internal attribute (.value).
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+  Dictionary mapping oracles to their results. This is used to get the relevant information for the energy term.
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="(unweighted_energy, weighted_energy) : tuple[float, float]">
+</ResponseField>
+
+<ResponseField name="return" type="float">
+  How well the structure satisfies the given criteria. Where possible, this number should be between 0 and 1.
+</ResponseField>
+
+<ResponseField name="return" type="float">
+  The unweighted energy multiplied by the energy term's weight.
+</ResponseField>
+
+### shift_residues_indices_after_removal
+
+Shifts internally stored res_indices on a given chain to reflect a residue has been removed from the chain.
+
+**Parameters**
+
+<ResponseField name="chain_id" type="str" required>
+</ResponseField>
+
+<ResponseField name="res_index" type="int" required>
+</ResponseField>
+
+### shift_residues_indices_before_addition
+
+Shifts internally stored res_indices on a given chain to reflect a residue has been added.
+
+**Parameters**
+
+<ResponseField name="chain_id" type="str" required>
+</ResponseField>
+
+<ResponseField name="res_index" type="int" required>
+</ResponseField>
+
+### remove_residue
+
+Remove residue from this energy term's calculations.
+
+**Parameters**
+
+<ResponseField name="chain_id" type="str" required>
+</ResponseField>
+
+<ResponseField name="res_index" type="int" required>
+</ResponseField>
+
+### add_residue
+
+Adds residue to this energy term's calculations, in the same group as its parent residue.
+
+**Parameters**
+
+<ResponseField name="chain_id" type="str" required>
+</ResponseField>
+
+<ResponseField name="res_index" type="int" required>
+</ResponseField>
+
+<ResponseField name="parent_res_index" type="int" required>
+</ResponseField>
+
+### get_residue_mask
+
+Creates residue mask from residue group. Structure used to find unique residues in state
+
+**Parameters**
+
+<ResponseField name="structure" type="AtomArray" required>
+</ResponseField>
+
+<ResponseField name="residue_group_index" type="int" required>
+</ResponseField>
+
+### get_atom_mask
+
+Creates atom mask from residue group. Structure used to find unique atoms in state
+
+**Parameters**
+
+<ResponseField name="structure" type="AtomArray" required>
+</ResponseField>
+
+<ResponseField name="residue_group_index" type="int" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

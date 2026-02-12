@@ -1,0 +1,33 @@
+---
+title: "Mutation"
+description: "Single mutation operation."
+---
+
+For GrandCanonical, the Mutation can be skipped if the move is impossible. In that case, move_type is None,
+but we keep track of the chain_id.
+
+## Parameters
+
+<ResponseField name="chain_id" type="str" required>
+</ResponseField>
+
+<ResponseField name="move_type" type="str | None" required>
+</ResponseField>
+
+<ResponseField name="residue_index" type="int | None" required>
+</ResponseField>
+
+<ResponseField name="old_amino_acid" type="str | None" required>
+</ResponseField>
+
+<ResponseField name="new_amino_acid" type="str | None" required>
+</ResponseField>
+
+<ResponseField name="parent_residue_index_by_state" type="Dict[str, Optional[int]] | None" default="None">
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

@@ -1,0 +1,50 @@
+---
+title: "ChemicalPotentialEnergy"
+description: "An energy term that purely depends on the number of residues present in a system. Note for statistical mechanics: for some choice of parameters, adding this term is equivalent to making a simulation in the grand-canonical ensemble, where the free-energy that is minimized is:"
+---
+
+$\Omega = E - \mu N
+
+where :math:`\Omega` is the grand potential, :math:`E` is the energy, :math:`\mu` is the chemical potential,
+and :math:`N` is the number of residues.
+
+## Parameters
+
+<ResponseField name="oracle" type="Oracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="power" type="float" default="1.0">
+  The power to raise the number of residues to.
+</ResponseField>
+
+<ResponseField name="target_size" type="int" default="0">
+  The target size of the system.
+</ResponseField>
+
+<ResponseField name="chemical_potential" type="float" default="1.0">
+  The chemical potential of the system.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+  The weight of the energy term.
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

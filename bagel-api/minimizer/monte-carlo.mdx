@@ -1,0 +1,66 @@
+---
+title: "MonteCarloMinimizer"
+description: "Base class for Monte Carlo based minimization methods."
+---
+
+## Parameters
+
+<ResponseField name="mutator" type="MutationProtocol" required>
+</ResponseField>
+
+<ResponseField name="temperature" type="float | list[float] | np.ndarray[Any, np.dtype[np.number]]" required>
+</ResponseField>
+
+<ResponseField name="n_steps" type="int" required>
+</ResponseField>
+
+<ResponseField name="acceptance_criterion" type="str" default="'metropolis'">
+</ResponseField>
+
+<ResponseField name="experiment_name" type="str | None" default="None">
+</ResponseField>
+
+<ResponseField name="log_frequency" type="int" default="100">
+</ResponseField>
+
+<ResponseField name="preserve_best_system_every_n_steps" type="int | None" default="None">
+</ResponseField>
+
+<ResponseField name="log_path" type="pl.Path | str | None" default="None">
+</ResponseField>
+
+<ResponseField name="callbacks" type="list['Callback'] | None" default="None">
+</ResponseField>
+
+<ResponseField name="**kwargs" type="Any">
+  Additional keyword arguments.
+</ResponseField>
+
+## Methods
+
+### minimize_one_step
+
+Perform one Monte Carlo step.
+
+**Parameters**
+
+<ResponseField name="step" type="int" required>
+</ResponseField>
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+### minimize_system
+
+Minimize system using Monte Carlo method.
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

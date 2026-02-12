@@ -1,0 +1,56 @@
+---
+title: "EarlyStopping"
+description: "Callback that monitors a metric and signals early stopping when it stops improving."
+---
+
+This is a dummy implementation that tracks state but doesn't actually stop
+the optimization (that's handled by CallbackManager). The callback sets
+a `_should_stop` flag when patience is exceeded.
+
+## Parameters
+
+<ResponseField name="monitor" type="str" required>
+  Metric name to monitor (e.g., "system_energy", "best_system_energy").
+</ResponseField>
+
+<ResponseField name="patience" type="int" required>
+  Number of steps with no improvement before stopping. Ideally, this should be set as a multiple of the number of Minimizer steps necessary to mutate the entire sequence (for the largest State).
+</ResponseField>
+
+<ResponseField name="min_delta" type="float" default="0.0">
+  Minimum change in the monitored metric to be considered an improvement.
+</ResponseField>
+
+<ResponseField name="mode" type="str" default="'min'">
+  Whether lower ("min") or higher ("max") values are better.
+</ResponseField>
+
+## Methods
+
+### on_optimization_start
+
+Reset tracking state at the start of optimization.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+### on_step_end
+
+Check if monitored metric has improved and update tracking state.
+
+**Parameters**
+
+<ResponseField name="context" type="CallbackContext" required>
+</ResponseField>
+
+## Example
+
+```python
+early_stop = EarlyStopping(
+    monitor="best_system_energy",
+    patience=100,
+    mode="min"
+)
+```

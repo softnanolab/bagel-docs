@@ -1,0 +1,84 @@
+---
+title: "MutationProtocol"
+description: ""
+---
+
+## Parameters
+
+<ResponseField name="mutation_bias" type="Dict[str, float]" default="lambda: mutation_bias_no_cystein()">
+</ResponseField>
+
+<ResponseField name="n_mutations" type="int" default="1">
+</ResponseField>
+
+<ResponseField name="exclude_self" type="bool" default="True">
+</ResponseField>
+
+## Methods
+
+### one_step
+
+Abstract method for performing a single mutation step.
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+  The system to be mutated
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="System">
+  The mutated system (new copy) MutationRecord Record of all mutations performed in this step
+</ResponseField>
+
+### choose_chain
+
+Choose one of the chains in the whole System that needs to be mutated. This is done by selecting a chain
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+### mutate_random_residue
+
+Mutate a random residue on a chain.
+
+**Parameters**
+
+<ResponseField name="chain" type="Chain" required>
+  The chain to mutate.
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="Mutation">
+  The mutation performed. This includes the chain_id, the move_type, the residue_index, the old_amino_acid, and the new_amino_acid.
+</ResponseField>
+
+### replay
+
+Replay a mutation record on a system, reusing existing mutation logic.
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+  The system to apply mutations to
+</ResponseField>
+
+<ResponseField name="mutation_record" type="MutationRecord" required>
+  Record of mutations to replay
+</ResponseField>
+
+**Returns**
+
+<ResponseField name="return" type="System">
+  System with mutations applied
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

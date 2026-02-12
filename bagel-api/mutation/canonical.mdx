@@ -1,0 +1,32 @@
+---
+title: "Canonical"
+description: "Canonical mutation protocol, making a substitution at random n residues. It cannot add or remove residues."
+---
+
+## Parameters
+
+<ResponseField name="n_mutations" type="int" default="1">
+  Number of mutations to perform in each step.
+</ResponseField>
+
+<ResponseField name="mutation_bias" type="Dict[str, float]" default="mutation_bias_no_cystein">
+  Bias for the substitution. The keys are the amino acids, the values are the probabilities.
+</ResponseField>
+
+<ResponseField name="exclude_self" type="bool" default="True">
+</ResponseField>
+
+## Methods
+
+### one_step
+
+**Parameters**
+
+<ResponseField name="system" type="System" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```

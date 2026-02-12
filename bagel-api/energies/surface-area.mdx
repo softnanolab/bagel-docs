@@ -1,0 +1,48 @@
+---
+title: "SurfaceAreaEnergy"
+description: "Energy term proportional to the amount of exposed surface area. This is measured by dividing the mean SASA (Solvent Accessible Surface Area) of the relevant atoms by the maximum possible SASA."
+---
+
+## Parameters
+
+<ResponseField name="oracle" type="FoldingOracle" required>
+  The oracle to use for the energy term.
+</ResponseField>
+
+<ResponseField name="inheritable" type="bool" default="True">
+  If a new residue is added next to a residue included in this energy term, this dictates whether that new residue could then be added to this energy term.
+</ResponseField>
+
+<ResponseField name="residues" type="list[Residue] | None" default="None">
+  Which residues to include in the calculation. Considers all residues by default.
+</ResponseField>
+
+<ResponseField name="probe_radius" type="float | None" default="None">
+  The VdW-radius of the solvent molecules used in the SASA calculation. Default is the water VdW-radius.
+</ResponseField>
+
+<ResponseField name="max_sasa" type="float | None" default="None">
+  The maximum SASA value used if normalization is enabled. Default is the full surface area of a Sulfur atom.
+</ResponseField>
+
+<ResponseField name="weight" type="float" default="1.0">
+</ResponseField>
+
+<ResponseField name="name" type="str | None" default="None">
+  Optional name to append to the energy term name.
+</ResponseField>
+
+## Methods
+
+### compute
+
+**Parameters**
+
+<ResponseField name="oracles_result" type="OraclesResultDict" required>
+</ResponseField>
+
+## Example
+
+```python
+{/* TODO: add example */}
+```
