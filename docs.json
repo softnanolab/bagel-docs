@@ -154,12 +154,7 @@
     "dark": "/logo/bagel-logo.png"
   },
   "navbar": {
-    "links": [],
-    "primary": {
-      "type": "button",
-      "label": "⚠️ Work in Progress",
-      "href": "#"
-    }
+    "links": []
   },
   "contextual": {
     "options": [
