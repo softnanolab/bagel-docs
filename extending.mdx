@@ -1,0 +1,131 @@
+---
+title: "Extending BAGEL"
+description: "Learn how to extend BAGEL with custom components"
+---
+
+BAGEL is fully extensible. You can define custom **Energy Terms**, **Minimizers**, and **Mutation Protocols** directly in your recipes (runtime) without needing to fork the repository or modify the core codebase.
+
+This guide explains how to implement these custom components.
+
+## Custom Energy Terms
+
+To add a new energy term (loss function), you need to create a class that inherits from `bagel.energies.EnergyTerm`.
+
+### Required Methods
+
+You must implement the `compute` method (which is called by `__call__` internally).
+
+- **`compute(self, oracles_result)`**: Calculates the energy based on the current system state.
+  - **Input**: `oracles_result` (a dictionary containing outputs from configured oracles like AlphaFold, ESM, etc.).
+  - **Output**: Typically returns a tuple `(unweighted_energy, weighted_energy)`.
+
+### Example
+
+Here is an example of a custom energy term that penalizes exposed hydrophobic residues:
+
+```python
+from bagel.energies import EnergyTerm
+import numpy as np
+
+class MyCustomEnergy(EnergyTerm):
+    def __init__(self, weight=1.0, name="custom_hydrophobic"):
+        super().__init__(weight=weight, name=name)
+
+    def compute(self, oracles_result):
+        # Extract relevant data from oracles_result
+        # For example, getting solvent accessible surface area (SASA)
+        # This is a hypothetical example assuming 'sasa' is available
+        sasa_score = oracles_result.get('sasa', 0.0)
+        
+        # Calculate energy (lower is better)
+        unweighted_energy = np.mean(sasa_score)
+        weighted_energy = unweighted_energy * self.weight
+        
+        return unweighted_energy, weighted_energy
+```
+
+You can then use this class directly in your recipe:
+
+```python
+# In your recipe script
+my_energy = MyCustomEnergy(weight=0.5)
+# Add to your objective function or system setup
+```
+
+## Custom Minimizers
+
+Minimizers define how the system explores the energy landscape. To build your own, inherit from `bagel.minimizer.Minimizer`.
+
+### Required Methods
+
+You must implement the `minimize_system` method (often referred to simply as `minimize`).
+
+- **`minimize_system(self, system)`**: Performs the optimization loop.
+  - **Input**: `system` (the initial state).
+  - **Output**: Returns the optimized `system`.
+
+### Example
+
+A simple random sampling minimizer:
+
+```python
+from bagel.minimizer import Minimizer
+
+class RandomSamplerMinimizer(Minimizer):
+    def minimize_system(self, system):
+        best_system = system
+        best_energy = float('inf')
+
+        for i in range(100):
+            # Mutate the system using the configured mutator
+            new_system, mutation_record = self.mutator.one_step(system)
+            
+            # Evaluate energy (pseudo-code)
+            energy = new_system.total_energy()
+            
+            if energy < best_energy:
+                best_energy = energy
+                best_system = new_system
+                
+        return best_system
+```
+
+## Custom Mutation Protocols
+
+Mutation protocols define how the system changes (e.g., sequence mutations). Inherit from `bagel.mutation.MutationProtocol`.
+
+### Required Methods
+
+You must implement the `one_step` method.
+
+- **`one_step(self, system)`**: Performs a single mutation step.
+  - **Input**: `system`.
+  - **Output**: A tuple `(new_system, mutation_record)`.
+
+### Example
+
+A mutation protocol that only mutates to Alanine:
+
+```python
+from bagel.mutation import MutationProtocol
+import copy
+
+class AlanineScanner(MutationProtocol):
+    def one_step(self, system):
+        # Create a copy of the system
+        new_system = copy.deepcopy(system)
+        
+        # Select a random residue and change it to Alanine
+        # (Implementation details depend on System API)
+        mutation_record = self.mutate_random_residue_to_alanine(new_system)
+        
+        return new_system, mutation_record
+    
+    def mutate_random_residue_to_alanine(self, system):
+        # Logic to modify sequence
+        pass
+```
+
+## Summary
+
+By extending these base classes, you can tailor BAGEL to highly specific protein engineering tasks without waiting for upstream changes. All these classes can be defined in your local Python scripts and passed into the BAGEL workflow.
