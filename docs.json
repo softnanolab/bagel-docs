@@ -28,6 +28,12 @@
             ]
           },
           {
+            "group": "Advanced",
+            "pages": [
+              "extending"
+            ]
+          },
+          {
             "group": "Customization",
             "pages": [
               "essentials/settings",
