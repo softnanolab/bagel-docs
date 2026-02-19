@@ -41,3 +41,9 @@ Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/sett
 
 ### Resources
 - [Mintlify documentation](https://mintlify.com/docs)
+
+## Private Case Studies
+
+These case studies are hidden from the docs site navigation and search, but accessible via direct link:
+
+- [Miniaturizing Enzymes](https://bagel.softnanolab.com/case-studies/miniaturizing-enzymes)
