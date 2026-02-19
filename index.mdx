@@ -1,101 +1,87 @@
 ---
 title: "Introduction"
-description: "Welcome to the new home for your documentation"
+description: "BAGEL — Protein Engineering via Exploration of an Energy Landscape"
 ---
 
 <Warning>
-🚨 **This documentation is work in progress and should not be referred to.** 🚨
+This documentation is work in progress and should not be referred to.
 </Warning>
 
-## Setting up
-
-Get your documentation site up and running in minutes.
+## Getting started
 
 <Card
-  title="Start here"
+  title="Getting Started"
   icon="rocket"
-  href="/quickstart"
+  href="/getting-started"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Install BAGEL and run your first protein design.
 </Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
 
 <Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
+  title="Concepts"
+  icon="diagram-project"
+  href="/concepts"
+  horizontal
 >
-  Browse our showcase of exceptional documentation sites.
+  Understand the core abstractions and design principles behind BAGEL.
 </Card>
+
+## Customization
+
+<Columns cols={2}>
+  <Card
+    title="Custom Energy Terms"
+    icon="bolt"
+    href="/customization/custom-energy-terms"
+  >
+    Define your own energy terms to encode design constraints.
+  </Card>
+  <Card
+    title="Custom Mutation Protocols"
+    icon="shuffle"
+    href="/customization/custom-mutation-protocols"
+  >
+    Define how BAGEL explores sequence space.
+  </Card>
+  <Card
+    title="Custom Minimizers"
+    icon="chart-line-down"
+    href="/customization/custom-minimizers"
+  >
+    Implement your own optimization strategy.
+  </Card>
+  <Card
+    title="Custom Oracles"
+    icon="eye"
+    href="/customization/custom-oracles"
+  >
+    Plug in new ML models as oracles.
+  </Card>
+</Columns>
+
+## Case studies
+
+<Columns cols={2}>
+  <Card
+    title="Simple Peptide Binder"
+    icon="link"
+    href="/case-studies/simple-peptide-binder"
+  >
+    Design a peptide binder from scratch.
+  </Card>
+  <Card
+    title="Targeting IDRs"
+    icon="crosshairs"
+    href="/case-studies/targeting-intrinsically-disordered-regions"
+  >
+    Design binders for intrinsically disordered regions.
+  </Card>
+  <Card
+    title="Enzyme Variants"
+    icon="flask-vial"
+    href="/case-studies/enzyme-variants"
+  >
+    Design functional enzyme variants.
+  </Card>
+</Columns>

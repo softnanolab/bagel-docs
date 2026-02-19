@@ -20,35 +20,31 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Guides",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "getting-started",
+              "concepts",
+              "development-guide"
             ]
           },
           {
             "group": "Customization",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "customization/custom-energy-terms",
+              "customization/custom-mutation-protocols",
+              "customization/custom-minimizers",
+              "customization/custom-oracles",
+              "customization/custom-callbacks"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Case Studies",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "case-studies/simple-peptide-binder",
+              "case-studies/targeting-intrinsically-disordered-regions",
+              "case-studies/enzyme-variants",
+              "case-studies/miniaturizing-enzymes"
             ]
           }
         ]
@@ -142,6 +138,37 @@
             "pages": [
               "bagel-api/analysis/analyzer",
               "bagel-api/analysis/simulated-tempering-analyzer"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "boileroom API",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["boileroom-api/overview", "boileroom-api/getting-started"]
+          },
+          {
+            "group": "Folding Models",
+            "pages": [
+              "boileroom-api/models/esmfold",
+              "boileroom-api/models/chai1",
+              "boileroom-api/models/boltz2"
+            ]
+          },
+          {
+            "group": "Embedding Models",
+            "pages": [
+              "boileroom-api/models/esm2"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "boileroom-api/reference/output-types",
+              "boileroom-api/reference/configuration",
+              "boileroom-api/reference/backends"
             ]
           }
         ]
