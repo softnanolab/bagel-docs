@@ -1,0 +1,114 @@
+---
+title: "Chai-1"
+description: "Diffusion-based protein structure prediction using the Chai-1 model."
+---
+
+Chai-1 is a diffusion-based protein structure prediction model that generates high-quality 3D structures. It supports optional ESM embeddings, MSA server queries, and template-based modeling.
+
+## Quick example
+
+```python
+from boileroom import Chai1
+
+model = Chai1(backend="modal")
+result = model.fold("MKTVRQERLKSIVRI")
+
+print(result.atom_array)  # list of Biotite AtomArray objects
+print(result.plddt)       # per-residue confidence scores
+```
+
+## Methods
+
+### `.fold()`
+
+Predict the 3D structure of one or more protein sequences.
+
+```python
+result = model.fold(sequences, options=None)
+```
+
+<ResponseField name="sequences" type="str | Sequence[str]" required>
+  A single amino acid sequence string or a list of sequences. Use `":"` to separate chains in a multimer (e.g., `"CHAIN_A:CHAIN_B"`). Chai-1 currently supports a single batch entry.
+</ResponseField>
+
+<ResponseField name="options" type="dict | None" default="None">
+  Per-call configuration overrides. Only dynamic config keys can be set here — static keys raise `ValueError`. See [Configuration](/boileroom-api/reference/configuration).
+</ResponseField>
+
+**Returns:** `Chai1Output` (see [Output](#output) below)
+
+## Output
+
+The `Chai1Output` dataclass returned by `.fold()`.
+
+### Always included
+
+<ResponseField name="metadata" type="PredictionMetadata">
+  Prediction metadata with timing information. See [PredictionMetadata](/boileroom-api/reference/output-types#predictionmetadata).
+</ResponseField>
+
+<ResponseField name="atom_array" type="list[AtomArray] | None">
+  List of Biotite `AtomArray` objects. Always generated.
+</ResponseField>
+
+### Confidence metrics
+
+<ResponseField name="pae" type="list[np.ndarray] | None">
+  Predicted aligned error matrices (one per diffusion sample).
+</ResponseField>
+
+<ResponseField name="pde" type="list[np.ndarray] | None">
+  Predicted distance error matrices (one per diffusion sample).
+</ResponseField>
+
+<ResponseField name="plddt" type="list[np.ndarray] | None">
+  Per-residue pLDDT scores (one array per diffusion sample).
+</ResponseField>
+
+<ResponseField name="ptm" type="list[np.ndarray] | None">
+  Complex pTM scores.
+</ResponseField>
+
+<ResponseField name="iptm" type="list[np.ndarray] | None">
+  Interface pTM scores.
+</ResponseField>
+
+<ResponseField name="per_chain_iptm" type="list[np.ndarray] | None">
+  Per-chain-pair interface pTM scores.
+</ResponseField>
+
+### Structure representations
+
+<ResponseField name="cif" type="list[str] | None">
+  mmCIF-formatted structure strings. Only generated when `include_fields` contains `"cif"` or `"*"`.
+</ResponseField>
+
+## Configuration
+
+These keys can be set via `config={}` at initialization or `options={}` per call (unless marked **static**).
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `num_trunk_recycles` | `int` | `3` | No | Number of trunk recycling iterations |
+| `num_diffn_timesteps` | `int` | `200` | No | Number of diffusion timesteps |
+| `num_diffn_samples` | `int` | `5` | No | Number of diffusion samples to generate |
+| `num_trunk_samples` | `int` | `1` | No | Number of trunk samples |
+| `use_esm_embeddings` | `bool` | `False` | No | Whether to use ESM embeddings as input features |
+| `use_msa_server` | `bool` | `False` | No | Whether to query an MSA server for multiple sequence alignments |
+| `use_templates_server` | `bool` | `False` | No | Whether to query a templates server for structural templates |
+| `include_fields` | `list[str] \| None` | `None` | No | Which output fields to return. Use `["cif"]` to include CIF strings. Use `["*"]` for everything |
+
+## Multimer prediction
+
+Separate chains with `":"` in the sequence string:
+
+```python
+result = model.fold("MKTVRQERLKSIVRI:LERSKEPVSGAQLAEE")
+
+print(result.atom_array)  # structure with both chains
+```
+
+<Note>
+Chai-1 currently supports only a single batch entry (one sequence or one multimer). If you pass a list of sequences, it must contain exactly one element.
+</Note>

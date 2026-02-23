@@ -1,0 +1,160 @@
+---
+title: "Boltz-2"
+description: "Diffusion-based protein structure prediction with MSA support using the Boltz-2 model."
+---
+
+Boltz-2 is a diffusion-based protein structure prediction model with built-in MSA (Multiple Sequence Alignment) support. It produces high-quality 3D structures with comprehensive confidence metrics and supports MSA caching for faster repeated predictions.
+
+## Quick example
+
+```python
+from boileroom import Boltz2
+
+model = Boltz2(backend="modal")
+result = model.fold("MKTVRQERLKSIVRI")
+
+print(result.atom_array)  # list of Biotite AtomArray objects
+print(result.plddt)       # per-residue confidence scores
+print(result.confidence)  # comprehensive confidence metrics
+```
+
+## Methods
+
+### `.fold()`
+
+Predict the 3D structure of one or more protein sequences.
+
+```python
+result = model.fold(sequences, options=None)
+```
+
+<ResponseField name="sequences" type="str | Sequence[str]" required>
+  A single amino acid sequence string or a list of sequences. Use `":"` to separate chains in a multimer (e.g., `"CHAIN_A:CHAIN_B"`).
+</ResponseField>
+
+<ResponseField name="options" type="dict | None" default="None">
+  Per-call configuration overrides. Only dynamic config keys can be set here — static keys raise `ValueError`. See [Configuration](/boileroom-api/reference/configuration).
+</ResponseField>
+
+**Returns:** `Boltz2Output` (see [Output](#output) below)
+
+## Output
+
+The `Boltz2Output` dataclass returned by `.fold()`.
+
+### Always included
+
+<ResponseField name="metadata" type="PredictionMetadata">
+  Prediction metadata with timing information. See [PredictionMetadata](/boileroom-api/reference/output-types#predictionmetadata).
+</ResponseField>
+
+<ResponseField name="atom_array" type="list[AtomArray] | None">
+  List of Biotite `AtomArray` objects (one per diffusion sample). Always generated.
+</ResponseField>
+
+### Confidence metrics
+
+<ResponseField name="confidence" type="list[dict] | None">
+  Comprehensive confidence metrics (one dict per sample). Each dict may contain keys like `confidence_score`, `ptm`, `iptm`, `ligand_iptm`, `protein_iptm`, `complex_plddt`, `complex_iplddt`, `complex_pde`, `complex_ipde`, `pair_chains_iptm`, and `chains_ptm`.
+</ResponseField>
+
+<ResponseField name="plddt" type="list[np.ndarray] | None">
+  Per-residue pLDDT scores (one 1D array per sample).
+</ResponseField>
+
+<ResponseField name="pae" type="list[np.ndarray] | None">
+  Predicted aligned error matrices (one 2D square matrix per sample).
+</ResponseField>
+
+<ResponseField name="pde" type="list[np.ndarray] | None">
+  Predicted distance error matrices (one 2D square matrix per sample).
+</ResponseField>
+
+### Structure representations
+
+<ResponseField name="pdb" type="list[str] | None">
+  PDB-formatted structure strings. Only generated when `include_fields` contains `"pdb"` or `"*"`.
+</ResponseField>
+
+<ResponseField name="cif" type="list[str] | None">
+  mmCIF-formatted structure strings. Only generated when `include_fields` contains `"cif"` or `"*"`.
+</ResponseField>
+
+## Configuration
+
+These keys can be set via `config={}` at initialization or `options={}` per call (unless marked **static**).
+
+### Core settings
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `cache_dir` | `str \| None` | `None` | Yes | Directory for model weights and resources. Defaults to `{MODEL_DIR}/boltz` |
+| `no_kernels` | `bool` | `False` | Yes | Disable custom CUDA kernels (use for CPU or debugging) |
+| `seed` | `int \| None` | `None` | No | Random seed for reproducibility |
+| `override` | `bool` | `False` | No | Override existing output files |
+| `num_workers` | `int` | `2` | No | Number of data loading workers |
+| `include_fields` | `list[str] \| None` | `None` | No | Which output fields to return. Use `["pdb"]` or `["cif"]` to include structure strings. Use `["*"]` for everything |
+
+### Diffusion settings
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `recycling_steps` | `int` | `3` | No | Number of recycling iterations |
+| `sampling_steps` | `int` | `200` | No | Number of diffusion sampling steps |
+| `diffusion_samples` | `int` | `1` | No | Number of structure samples to generate |
+| `max_parallel_samples` | `int` | `5` | No | Maximum number of samples to run in parallel |
+| `step_scale` | `float` | `1.5` | No | Step scale factor for diffusion |
+
+### MSA settings
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `use_msa_server` | `bool` | `True` | No | Whether to query the MSA server. Set to `False` for single-sequence mode |
+| `msa_server_url` | `str` | `"https://api.colabfold.com"` | No | URL of the MSA server |
+| `msa_pairing_strategy` | `str` | `"greedy"` | No | Strategy for pairing MSA sequences |
+| `max_msa_seqs` | `int` | `8192` | No | Maximum number of MSA sequences to use |
+| `subsample_msa` | `bool` | `True` | No | Whether to subsample MSAs |
+| `num_subsampled_msa` | `int` | `1024` | No | Number of subsampled MSA sequences |
+
+### Output settings
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `write_full_pae` | `bool` | `True` | No | Compute and include full PAE matrix |
+| `write_full_pde` | `bool` | `True` | No | Compute and include full PDE matrix |
+| `write_embeddings` | `bool` | `False` | No | Include model embeddings in output |
+
+### MSA caching
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `msa_cache_enabled` | `bool` | `True` | No | Enable or disable MSA caching |
+
+## MSA caching
+
+Boltz-2 automatically caches MSA results to avoid redundant server queries. When you fold a sequence for the first time, the MSA is fetched from the server and stored locally. Subsequent predictions for the same sequence reuse the cached MSA.
+
+Cache files are stored in a hash-prefixed directory structure under `{cache_dir}/boltz/msa_cache/`. An index file (`msa_index.json`) tracks cached entries with metadata including creation time, last access time, and file size.
+
+To disable caching, set `config={"msa_cache_enabled": False}`.
+
+## Multimer prediction
+
+Separate chains with `":"` in the sequence string:
+
+```python
+result = model.fold("MKTVRQERLKSIVRI:LERSKEPVSGAQLAEE")
+
+print(result.atom_array)   # structure with both chains
+print(result.confidence)   # includes inter-chain metrics
+```
+
+## Single-sequence mode
+
+To run without MSA (faster but potentially lower quality):
+
+```python
+model = Boltz2(backend="modal", config={"use_msa_server": False})
+result = model.fold("MKTVRQERLKSIVRI")
+```

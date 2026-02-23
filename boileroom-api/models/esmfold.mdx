@@ -1,0 +1,143 @@
+---
+title: "ESMFold"
+description: "Fast single-sequence protein structure prediction using Meta's ESMFold model."
+---
+
+ESMFold predicts protein 3D structure directly from a single amino acid sequence using Meta's end-to-end language model approach. It does not require multiple sequence alignments (MSAs), making it fast for rapid prototyping.
+
+## Quick example
+
+```python
+from boileroom import ESMFold
+
+model = ESMFold(backend="modal")
+result = model.fold("MKTVRQERLKSIVRI")
+
+print(result.atom_array)   # list of Biotite AtomArray objects
+print(result.plddt.shape)  # per-residue confidence scores
+```
+
+## Methods
+
+### `.fold()`
+
+Predict the 3D structure of one or more protein sequences.
+
+```python
+result = model.fold(sequences, options=None)
+```
+
+<ResponseField name="sequences" type="str | Sequence[str]" required>
+  A single amino acid sequence string or a list of sequences. Use `":"` to separate chains in a multimer (e.g., `"CHAIN_A:CHAIN_B"`).
+</ResponseField>
+
+<ResponseField name="options" type="dict | None" default="None">
+  Per-call configuration overrides. Only dynamic config keys can be set here — static keys raise `ValueError`. See [Configuration](/boileroom-api/reference/configuration).
+</ResponseField>
+
+**Returns:** `ESMFoldOutput` (see [Output](#output) below)
+
+## Output
+
+The `ESMFoldOutput` dataclass returned by `.fold()`.
+
+### Always included
+
+<ResponseField name="metadata" type="PredictionMetadata">
+  Prediction metadata with timing information. See [PredictionMetadata](/boileroom-api/reference/output-types#predictionmetadata).
+</ResponseField>
+
+<ResponseField name="atom_array" type="list[AtomArray] | None">
+  List of Biotite `AtomArray` objects, one per input sequence. Always generated.
+</ResponseField>
+
+### Confidence metrics
+
+<ResponseField name="plddt" type="np.ndarray | None">
+  Per-residue predicted local distance difference test. Shape: `(batch, residue, 37)`.
+</ResponseField>
+
+<ResponseField name="ptm" type="np.ndarray | None">
+  Predicted TM-score (scalar per sample).
+</ResponseField>
+
+<ResponseField name="pae" type="np.ndarray | None">
+  Predicted aligned error. Shape: `(batch, residue, residue)`.
+</ResponseField>
+
+<ResponseField name="max_pae" type="np.ndarray | None">
+  Maximum predicted aligned error (scalar per sample).
+</ResponseField>
+
+### Structure representations
+
+<ResponseField name="pdb" type="list[str] | None">
+  PDB-formatted structure strings. Only generated when `include_fields` contains `"pdb"` or `"*"`.
+</ResponseField>
+
+<ResponseField name="cif" type="list[str] | None">
+  mmCIF-formatted structure strings. Only generated when `include_fields` contains `"cif"` or `"*"`.
+</ResponseField>
+
+### Index arrays
+
+<ResponseField name="chain_index" type="np.ndarray | None">
+  Per-residue chain assignment. Shape: `(batch, residue)`.
+</ResponseField>
+
+<ResponseField name="residue_index" type="np.ndarray | None">
+  Per-residue residue numbering. Shape: `(batch, residue)`.
+</ResponseField>
+
+### Model internals
+
+<ResponseField name="frames" type="np.ndarray | None">
+  Backbone frames. Shape: `(model_layer, batch, residue, 7)`.
+</ResponseField>
+
+<ResponseField name="sidechain_frames" type="np.ndarray | None">
+  Sidechain frames. Shape: `(model_layer, batch, residue, 8, 4, 4)`.
+</ResponseField>
+
+<ResponseField name="angles" type="np.ndarray | None">
+  Torsion angles. Shape: `(model_layer, batch, residue, 7, 2)`.
+</ResponseField>
+
+<ResponseField name="states" type="np.ndarray | None">
+  Intermediate structure module states. Shape: `(model_layer, batch, residue, dim)`.
+</ResponseField>
+
+<ResponseField name="s_s" type="np.ndarray | None">
+  Single representation from the trunk. Shape: `(batch, residue, 1024)`.
+</ResponseField>
+
+<ResponseField name="s_z" type="np.ndarray | None">
+  Pair representation from the trunk. Shape: `(batch, residue, residue, 128)`.
+</ResponseField>
+
+<ResponseField name="distogram_logits" type="np.ndarray | None">
+  Distogram logits. Shape: `(batch, residue, residue, 64)`.
+</ResponseField>
+
+## Configuration
+
+These keys can be set via `config={}` at initialization or `options={}` per call (unless marked **static**).
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `glycine_linker` | `str` | `""` | No | Linker string inserted between chains for multimer tokenization |
+| `position_ids_skip` | `int` | `512` | No | Position ID offset between chains in multimer mode |
+| `include_fields` | `list[str] \| None` | `None` | No | Which output fields to return. `None` returns all; use `["pdb"]` or `["cif"]` to generate structure strings. Use `["*"]` for everything including PDB/CIF |
+
+## Multimer prediction
+
+Separate chains with `":"` in the sequence string:
+
+```python
+result = model.fold("MKTVRQERLKSIVRI:LERSKEPVSGAQLAEE")
+
+# Chain information is available in the output
+print(result.chain_index)    # per-residue chain assignment
+print(result.residue_index)  # per-residue residue numbering
+```

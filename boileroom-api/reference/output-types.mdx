@@ -1,0 +1,82 @@
+---
+title: "Output Types"
+description: "Shared output types, cross-model field comparison, and include_fields filtering for boileroom models."
+---
+
+All boileroom models return typed dataclass objects containing prediction results and metadata. Each model's output type is documented on its own page — this page covers the shared `PredictionMetadata` type, cross-model comparison, and the `include_fields` filtering mechanism.
+
+## PredictionMetadata
+
+Every output's `metadata` field is a `PredictionMetadata` instance with timing and model information.
+
+<ResponseField name="model_name" type="str">
+  Name of the model (e.g., `"ESMFold"`, `"ESM-2"`, `"Chai-1"`, `"Boltz-2"`).
+</ResponseField>
+
+<ResponseField name="model_version" type="str">
+  Version string of the model.
+</ResponseField>
+
+<ResponseField name="sequence_lengths" type="list[int] | None">
+  Number of residues for each input sequence (excluding chain separators).
+</ResponseField>
+
+<ResponseField name="preprocessing_time" type="float | None">
+  Time spent in preprocessing (seconds).
+</ResponseField>
+
+<ResponseField name="inference_time" type="float | None">
+  Time spent in model inference (seconds).
+</ResponseField>
+
+<ResponseField name="postprocessing_time" type="float | None">
+  Time spent in postprocessing (seconds).
+</ResponseField>
+
+## Per-model output types
+
+Each model page documents its full output dataclass:
+
+- [`ESMFoldOutput`](/boileroom-api/models/esmfold#output) — returned by `ESMFold.fold()`
+- [`ESM2Output`](/boileroom-api/models/esm2#output) — returned by `ESM2.embed()`
+- [`Chai1Output`](/boileroom-api/models/chai1#output) — returned by `Chai1.fold()`
+- [`Boltz2Output`](/boileroom-api/models/boltz2#output) — returned by `Boltz2.fold()`
+
+## Cross-model comparison
+
+| Field | ESMFold | ESM2 | Chai-1 | Boltz-2 |
+|---|---|---|---|---|
+| `metadata` | Yes | Yes | Yes | Yes |
+| `atom_array` | Yes | — | Yes | Yes |
+| `embeddings` | — | Yes | — | — |
+| `plddt` | Yes | — | Yes | Yes |
+| `pae` | Yes | — | Yes | Yes |
+| `pde` | — | — | Yes | Yes |
+| `ptm` | Yes | — | Yes | — |
+| `iptm` | — | — | Yes | — |
+| `confidence` | — | — | — | Yes |
+| `pdb` | Yes | — | — | Yes |
+| `cif` | Yes | — | Yes | Yes |
+| `chain_index` | Yes | Yes | — | — |
+| `residue_index` | Yes | Yes | — | — |
+| `hidden_states` | — | Yes | — | — |
+| `s_s` / `s_z` | Yes | — | — | — |
+
+## Filtering with `include_fields`
+
+All models support an `include_fields` configuration key that controls which optional fields are returned. This is useful for reducing memory usage and transfer time when you only need specific outputs.
+
+```python
+# Only return pLDDT scores (atom_array is always included for folding models)
+result = model.fold("MKTVRQERLKSIVRI", options={"include_fields": ["plddt"]})
+
+# Return everything including PDB/CIF strings
+result = model.fold("MKTVRQERLKSIVRI", options={"include_fields": ["*"]})
+
+# Return PDB and PAE
+result = model.fold("MKTVRQERLKSIVRI", options={"include_fields": ["pdb", "pae"]})
+```
+
+Fields not listed in `include_fields` are set to `None`. The following fields are always included regardless of the filter:
+- **Folding models:** `metadata`, `atom_array`
+- **Embedding models:** `metadata`, `embeddings`, `chain_index`, `residue_index`

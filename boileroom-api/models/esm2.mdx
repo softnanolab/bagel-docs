@@ -1,0 +1,118 @@
+---
+title: "ESM2"
+description: "Protein language model for computing sequence embeddings using Meta's ESM-2."
+---
+
+ESM2 generates per-residue embeddings from protein sequences using Meta's ESM-2 protein language model. These embeddings capture structural and functional information and can be used for downstream tasks like similarity comparison, clustering, or as features for other models.
+
+## Quick example
+
+```python
+from boileroom import ESM2
+
+model = ESM2(backend="modal")
+result = model.embed("MKTVRQERLKSIVRI")
+
+print(result.embeddings.shape)  # (1, seq_len, embedding_dim)
+```
+
+## Methods
+
+### `.embed()`
+
+Generate embeddings for one or more protein sequences.
+
+```python
+result = model.embed(sequences, options=None)
+```
+
+<ResponseField name="sequences" type="str | Sequence[str]" required>
+  A single amino acid sequence string or a list of sequences. Use `":"` to separate chains in a multimer (e.g., `"CHAIN_A:CHAIN_B"`).
+</ResponseField>
+
+<ResponseField name="options" type="dict | None" default="None">
+  Per-call configuration overrides. Only dynamic config keys can be set here — static keys raise `ValueError`. See [Configuration](/boileroom-api/reference/configuration).
+</ResponseField>
+
+**Returns:** `ESM2Output` (see [Output](#output) below)
+
+## Output
+
+The `ESM2Output` dataclass returned by `.embed()`.
+
+### Always included
+
+<ResponseField name="metadata" type="PredictionMetadata">
+  Prediction metadata with timing information. See [PredictionMetadata](/boileroom-api/reference/output-types#predictionmetadata).
+</ResponseField>
+
+<ResponseField name="embeddings" type="np.ndarray">
+  Per-residue embeddings from the final transformer layer. Shape: `(batch, seq_len, embedding_dim)`.
+</ResponseField>
+
+<ResponseField name="chain_index" type="np.ndarray">
+  Per-residue chain assignment. Shape: `(batch, seq_len)`.
+</ResponseField>
+
+<ResponseField name="residue_index" type="np.ndarray">
+  Per-residue residue numbering. Shape: `(batch, seq_len)`.
+</ResponseField>
+
+### Optional
+
+<ResponseField name="hidden_states" type="np.ndarray | None">
+  Embeddings from all intermediate transformer layers. Shape: `(batch, num_layers, seq_len, embedding_dim)`. Only included when `include_fields` contains `"hidden_states"` or `"*"`.
+</ResponseField>
+
+## Model sizes
+
+ESM-2 is available in 6 sizes. Set the model via `config={"model_name": "..."}`.
+
+| Model name | Parameters | Layers | Hidden dim | Attention heads |
+|---|---|---|---|---|
+| `esm2_t6_8M_UR50D` | 8M | 6 | 320 | 20 |
+| `esm2_t12_35M_UR50D` | 35M | 12 | 480 | 20 |
+| `esm2_t30_150M_UR50D` | 150M | 30 | 640 | 12 |
+| `esm2_t33_650M_UR50D` | 650M | 33 | 1280 | 20 |
+| `esm2_t36_3B_UR50D` | 3B | 36 | 2560 | 40 |
+| `esm2_t48_15B_UR50D` | 15B | 48 | 5120 | 40 |
+
+The default model is `esm2_t33_650M_UR50D` (650M parameters).
+
+## Configuration
+
+These keys can be set via `config={}` at initialization or `options={}` per call (unless marked **static**).
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `model_name` | `str` | `"esm2_t33_650M_UR50D"` | Yes | ESM-2 model variant to use (see table above) |
+| `glycine_linker` | `str` | `""` | No | Linker string inserted between chains for multimer tokenization |
+| `position_ids_skip` | `int` | `512` | No | Position ID offset between chains in multimer mode |
+| `include_fields` | `list[str] \| None` | `None` | No | Which output fields to return. Use `["hidden_states"]` to include all intermediate layer representations. Use `["*"]` for everything |
+
+## Multimer embedding
+
+Separate chains with `":"` in the sequence string:
+
+```python
+result = model.embed("MKTVRQERLKSIVRI:LERSKEPVSGAQLAEE")
+
+print(result.chain_index.shape)    # per-residue chain assignment
+print(result.residue_index.shape)  # per-residue residue numbering
+```
+
+## Hidden states
+
+To retrieve embeddings from all intermediate transformer layers, include `"hidden_states"` in `include_fields`:
+
+```python
+model = ESM2(backend="modal")
+result = model.embed(
+    "MKTVRQERLKSIVRI",
+    options={"include_fields": ["hidden_states"]}
+)
+
+# hidden_states shape: (batch_size, num_layers, seq_len, embedding_dim)
+print(result.hidden_states.shape)
+```

@@ -1,0 +1,99 @@
+---
+title: "Getting Started"
+description: "Getting started with boileroom API"
+---
+
+## Quick start
+
+```python
+from boileroom import ESMFold
+
+model = ESMFold(backend="modal")
+result = model.fold("MKTVRQERLKSIVRI")
+
+# Access the predicted structure
+print(result.atom_array)  # list of Biotite AtomArray objects
+```
+
+## Available models
+
+| Model | Type | Method | Description |
+|---|---|---|---|
+| `ESMFold` | Structure prediction | `.fold()` | Meta's fast single-sequence structure prediction |
+| `ESM2` | Embeddings | `.embed()` | Protein language model embeddings (6 model sizes) |
+| `Chai1` | Structure prediction | `.fold()` | Diffusion-based structure prediction |
+| `Boltz2` | Structure prediction | `.fold()` | Diffusion-based structure prediction with MSA support |
+
+## Import patterns
+
+```python
+from boileroom import ESMFold, ESM2, Chai1, Boltz2
+```
+
+## Constructor
+
+All models share the same constructor signature:
+
+```python
+Model(backend="modal", device=None, config=None)
+```
+
+<ResponseField name="backend" type="str" default="modal">
+  Backend to use for execution. Supported values: `"modal"` (serverless GPU) or `"apptainer"` (local GPU via container). See [Backends](/boileroom-api/reference/backends).
+</ResponseField>
+
+<ResponseField name="device" type="str | None" default="None">
+  GPU device identifier (e.g., `"cuda:0"`, `"cpu"`). If `None`, defaults to `"cuda:0"` when a GPU is available.
+</ResponseField>
+
+<ResponseField name="config" type="dict | None" default="None">
+  Model-specific configuration overrides merged with defaults. Each model has its own config keys — see the model's page or [Configuration](/boileroom-api/reference/configuration).
+</ResponseField>
+
+## Context manager
+
+All models can be used as context managers to ensure the backend is properly shut down:
+
+```python
+with ESMFold(backend="modal") as model:
+    result = model.fold("MKTVRQERLKSIVRI")
+# Backend is automatically stopped
+```
+
+Without a context manager, the backend is cleaned up when the model instance is garbage collected or when the Python process exits.
+
+## Folding models
+
+<CardGroup cols={3}>
+  <Card title="ESMFold" icon="dna" href="/boileroom-api/models/esmfold">
+    Fast single-sequence protein structure prediction.
+  </Card>
+  <Card title="Chai-1" icon="atom" href="/boileroom-api/models/chai1">
+    Diffusion-based structure prediction.
+  </Card>
+  <Card title="Boltz-2" icon="rocket" href="/boileroom-api/models/boltz2">
+    Diffusion-based structure prediction with MSA support.
+  </Card>
+</CardGroup>
+
+## Embedding models
+
+<CardGroup cols={3}>
+  <Card title="ESM2" icon="layer-group" href="/boileroom-api/models/esm2">
+    Protein language model for sequence embeddings.
+  </Card>
+</CardGroup>
+
+## Reference
+
+<CardGroup cols={3}>
+  <Card title="Output Types" icon="database" href="/boileroom-api/reference/output-types">
+    Shared output types and cross-model comparison.
+  </Card>
+  <Card title="Configuration" icon="gear" href="/boileroom-api/reference/configuration">
+    Static vs dynamic config, per-model config keys.
+  </Card>
+  <Card title="Backends" icon="server" href="/boileroom-api/reference/backends">
+    Modal (serverless) and Apptainer (local) backends.
+  </Card>
+</CardGroup>

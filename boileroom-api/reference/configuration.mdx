@@ -1,0 +1,117 @@
+---
+title: "Configuration"
+description: "How to configure boileroom models — static vs dynamic config keys, initialization vs per-call overrides."
+---
+
+All boileroom models accept a `config` dictionary at initialization and an `options` dictionary per call. Understanding the difference between **static** and **dynamic** configuration keys is essential for using the API correctly.
+
+## Static vs dynamic config
+
+Configuration keys are divided into two categories:
+
+- **Static keys** can only be set at initialization via `config={}`. Attempting to override them per-call via `options={}` raises a `ValueError`. These keys affect model loading or resource allocation and cannot be changed between calls.
+
+- **Dynamic keys** can be set at initialization via `config={}` (setting a default) or overridden per-call via `options={}`.
+
+## Setting config at initialization
+
+Pass a `config` dictionary when creating the model:
+
+```python
+from boileroom import ESMFold
+
+model = ESMFold(
+    backend="modal",
+    config={
+        "include_fields": ["plddt", "pae"],
+        "glycine_linker": "G" * 25,
+    }
+)
+```
+
+## Overriding per call
+
+Pass an `options` dictionary to the prediction method:
+
+```python
+# Override dynamic keys per call
+result = model.fold(
+    "MKTVRQERLKSIVRI",
+    options={"include_fields": ["pdb", "plddt"]}
+)
+```
+
+## Error behavior
+
+Attempting to override a static key per-call raises a `ValueError`:
+
+```python
+model = ESMFold(backend="modal")
+
+# This raises ValueError — "device" is static
+result = model.fold("MKTVRQERLKSIVRI", options={"device": "cpu"})
+# ValueError: The following config keys can only be set at initialization
+# and cannot be overridden per-call: ['device']
+```
+
+## Full configuration reference
+
+### ESMFold
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `glycine_linker` | `str` | `""` | No | Linker string for multimer tokenization |
+| `position_ids_skip` | `int` | `512` | No | Position ID offset between chains |
+| `include_fields` | `list[str] \| None` | `None` | No | Output fields to return |
+
+### ESM2
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `model_name` | `str` | `"esm2_t33_650M_UR50D"` | Yes | ESM-2 model variant |
+| `glycine_linker` | `str` | `""` | No | Linker string for multimer tokenization |
+| `position_ids_skip` | `int` | `512` | No | Position ID offset between chains |
+| `include_fields` | `list[str] \| None` | `None` | No | Output fields to return |
+
+### Chai-1
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `num_trunk_recycles` | `int` | `3` | No | Trunk recycling iterations |
+| `num_diffn_timesteps` | `int` | `200` | No | Diffusion timesteps |
+| `num_diffn_samples` | `int` | `5` | No | Diffusion samples to generate |
+| `num_trunk_samples` | `int` | `1` | No | Trunk samples |
+| `use_esm_embeddings` | `bool` | `False` | No | Use ESM embeddings as input |
+| `use_msa_server` | `bool` | `False` | No | Query MSA server |
+| `use_templates_server` | `bool` | `False` | No | Query templates server |
+| `include_fields` | `list[str] \| None` | `None` | No | Output fields to return |
+
+### Boltz-2
+
+| Key | Type | Default | Static | Description |
+|---|---|---|---|---|
+| `device` | `str` | `"cuda:0"` | Yes | GPU device identifier |
+| `cache_dir` | `str \| None` | `None` | Yes | Model weights and resources directory |
+| `no_kernels` | `bool` | `False` | Yes | Disable custom CUDA kernels |
+| `use_msa_server` | `bool` | `True` | No | Query MSA server |
+| `msa_server_url` | `str` | `"https://api.colabfold.com"` | No | MSA server URL |
+| `msa_pairing_strategy` | `str` | `"greedy"` | No | MSA pairing strategy |
+| `recycling_steps` | `int` | `3` | No | Recycling iterations |
+| `sampling_steps` | `int` | `200` | No | Diffusion sampling steps |
+| `diffusion_samples` | `int` | `1` | No | Structure samples to generate |
+| `max_parallel_samples` | `int` | `5` | No | Max parallel samples |
+| `step_scale` | `float` | `1.5` | No | Diffusion step scale factor |
+| `write_full_pae` | `bool` | `True` | No | Compute full PAE matrix |
+| `write_full_pde` | `bool` | `True` | No | Compute full PDE matrix |
+| `write_embeddings` | `bool` | `False` | No | Include model embeddings |
+| `num_workers` | `int` | `2` | No | Data loading workers |
+| `max_msa_seqs` | `int` | `8192` | No | Max MSA sequences |
+| `subsample_msa` | `bool` | `True` | No | Subsample MSAs |
+| `num_subsampled_msa` | `int` | `1024` | No | Number of subsampled MSA sequences |
+| `msa_cache_enabled` | `bool` | `True` | No | Enable MSA caching |
+| `override` | `bool` | `False` | No | Override existing output files |
+| `seed` | `int \| None` | `None` | No | Random seed |
+| `include_fields` | `list[str] \| None` | `None` | No | Output fields to return |

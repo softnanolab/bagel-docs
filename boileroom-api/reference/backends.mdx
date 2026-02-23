@@ -1,0 +1,105 @@
+---
+title: "Backends"
+description: "Modal (serverless) and Apptainer (local) backends for running boileroom models on GPU infrastructure."
+---
+
+boileroom supports two backends for executing models on GPUs. The user-facing API is **identical regardless of backend** — you call `.fold()` or `.embed()` the same way, and get the same output types back.
+
+## Backend selection
+
+Set the backend when creating a model:
+
+```python
+from boileroom import ESMFold
+
+# Serverless GPU via Modal (default)
+model = ESMFold(backend="modal")
+
+# Local GPU via Apptainer container
+model = ESMFold(backend="apptainer")
+```
+
+## Modal backend
+
+Modal provides serverless GPU execution. Your code runs locally, but the model inference runs on Modal's cloud GPUs. Containers scale to zero when idle and spin up on demand.
+
+### Setup
+
+1. Install Modal: `pip install modal`
+2. Authenticate: `modal token new`
+3. Use the model with `backend="modal"` (this is the default)
+
+### GPU options
+
+Modal automatically selects a GPU based on the model's requirements. The following GPU types are available on Modal:
+
+| GPU | VRAM |
+|---|---|
+| T4 | 16 GB |
+| L4 | 24 GB |
+| A10G | 24 GB |
+| A100-40GB | 40 GB |
+| A100-80GB | 80 GB |
+| L40S | 48 GB |
+| H100 | 80 GB |
+
+### Serverless scaling
+
+- Containers cold-start when first called (may take 30-60 seconds)
+- Subsequent calls reuse warm containers
+- Containers automatically scale down after a period of inactivity
+
+## Apptainer backend
+
+Apptainer (formerly Singularity) runs models in a container on your local machine or HPC cluster. This is useful when you need local execution, cannot use cloud services, or are running on institutional compute.
+
+### Setup
+
+1. Install Apptainer on your system
+2. Use `backend="apptainer"` or `backend="apptainer:tag"` to specify a Docker image tag
+
+### Tag syntax
+
+By default, the Apptainer backend uses the `latest` Docker image tag. You can specify a different tag:
+
+```python
+# Use the latest image
+model = ESMFold(backend="apptainer")
+
+# Equivalent to above
+model = ESMFold(backend="apptainer:latest")
+
+# Use a specific version tag
+model = ESMFold(backend="apptainer:v1.0.0")
+```
+
+### Local execution
+
+The Apptainer backend runs the model on your local GPU. Ensure you have a CUDA-compatible GPU with sufficient VRAM for the model.
+
+## Context manager
+
+Both backends support context manager usage to ensure proper cleanup:
+
+```python
+with ESMFold(backend="modal") as model:
+    result = model.fold("MKTVRQERLKSIVRI")
+# Backend resources are automatically released
+```
+
+Without a context manager, the backend is cleaned up when the `ModelWrapper` instance is garbage collected or when the Python process exits.
+
+## Device selection
+
+The `device` parameter works the same way across backends:
+
+```python
+# Let the backend auto-select (default: "cuda:0" if available)
+model = ESMFold(backend="modal")
+
+# Specify a device
+model = ESMFold(backend="modal", device="cuda:0")
+
+# Force CPU execution
+model = ESMFold(backend="modal", device="cpu")
+```
