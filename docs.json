@@ -24,8 +24,7 @@
             "pages": [
               "index",
               "getting-started",
-              "concepts",
-              "development-guide"
+              "concepts"
             ]
           },
           {
@@ -44,7 +43,8 @@
               "case-studies/simple-peptide-binder",
               "case-studies/targeting-intrinsically-disordered-regions",
               "case-studies/enzyme-variants",
-              "case-studies/miniaturizing-enzymes"
+              "case-studies/papers/bagel-plos",
+              "case-studies/papers/targeting-idr"
             ]
           }
         ]
@@ -54,7 +54,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["bagel-api/overview"]
+            "pages": [
+              "bagel-api/overview"
+            ]
           },
           {
             "group": "Core",
@@ -98,8 +100,6 @@
           {
             "group": "Mutation",
             "pages": [
-              "bagel-api/mutation/mutation",
-              "bagel-api/mutation/mutation-record",
               "bagel-api/mutation/mutation-protocol",
               "bagel-api/mutation/canonical",
               "bagel-api/mutation/grand-canonical"
@@ -109,24 +109,14 @@
             "group": "Oracles",
             "pages": [
               "bagel-api/oracles/oracle",
-              "bagel-api/oracles/oracle-result",
-              "bagel-api/oracles/oracles-result-dict",
-              "bagel-api/oracles/folding-oracle",
-              "bagel-api/oracles/folding-result",
               "bagel-api/oracles/esmfold",
-              "bagel-api/oracles/esmfold-result",
-              "bagel-api/oracles/embedding-oracle",
-              "bagel-api/oracles/embedding-result",
-              "bagel-api/oracles/esm2",
-              "bagel-api/oracles/esm2-result"
+              "bagel-api/oracles/esm2"
             ]
           },
           {
             "group": "Callbacks",
             "pages": [
               "bagel-api/callbacks/callback",
-              "bagel-api/callbacks/callback-context",
-              "bagel-api/callbacks/callback-manager",
               "bagel-api/callbacks/default-logger",
               "bagel-api/callbacks/folding-logger",
               "bagel-api/callbacks/early-stopping",
@@ -147,7 +137,10 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["boileroom-api/overview", "boileroom-api/getting-started"]
+            "pages": [
+              "boileroom-api/overview",
+              "boileroom-api/getting-started"
+            ]
           },
           {
             "group": "Folding Models",
@@ -185,15 +178,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {

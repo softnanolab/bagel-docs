@@ -1,14 +1,27 @@
-.katex-display {
-  overflow-x: visible;
-  overflow-y: visible;
+/* BAGEL docs presentation overrides */
+:root {
+  --bagel-font-size-base: 15px;
+  --bagel-shell-max-width-xl: 110rem;
+  --bagel-content-max-width-xl: 72rem;
+  --bagel-left-nav-width: 18rem;
+  --bagel-right-toc-width: 20rem;
+  --bagel-navbar-inline-padding-xl: 1rem;
+  --bagel-scrollbar-size: 10px;
 }
 
+/* Slightly reduce global typography scale */
+html {
+  font-size: var(--bagel-font-size-base);
+}
+
+/* Keep KaTeX display math from clipping */
+.katex-display,
 .katex-display > .katex {
   overflow-x: visible;
   overflow-y: visible;
 }
 
-/* Hide horizontal scrollbar and truncate long TOC entries */
+/* Keep long TOC entries visually clean */
 #table-of-contents a,
 #table-of-contents-content a {
   overflow: hidden;
@@ -23,7 +36,91 @@
   overflow-x: hidden;
 }
 
+/* Sidebar and TOC scrollbar styling */
+#sidebar-content,
+#table-of-contents,
+#table-of-contents-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--gray-500) / 0.45) transparent;
+}
+
+#sidebar-content::-webkit-scrollbar,
+#table-of-contents::-webkit-scrollbar,
+#table-of-contents-content::-webkit-scrollbar {
+  width: var(--bagel-scrollbar-size);
+  height: var(--bagel-scrollbar-size);
+}
+
+#sidebar-content::-webkit-scrollbar-thumb,
+#table-of-contents::-webkit-scrollbar-thumb,
+#table-of-contents-content::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--gray-500) / 0.38);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+#sidebar-content:hover::-webkit-scrollbar-thumb,
+#table-of-contents:hover::-webkit-scrollbar-thumb,
+#table-of-contents-content:hover::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--gray-500) / 0.55);
+}
+
+.dark #sidebar-content::-webkit-scrollbar-thumb,
+.dark #table-of-contents::-webkit-scrollbar-thumb,
+.dark #table-of-contents-content::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--gray-400) / 0.4);
+}
+
+.dark #sidebar-content:hover::-webkit-scrollbar-thumb,
+.dark #table-of-contents:hover::-webkit-scrollbar-thumb,
+.dark #table-of-contents-content:hover::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--gray-300) / 0.5);
+}
+
 /* Fix pagination buttons from being all-caps */
 #pagination .uppercase {
   text-transform: none !important;
+}
+
+@media (min-width: 1280px) {
+  /*
+   * This shell wrapper has no stable ID in Mintlify.
+   * Keep this as the only class-based selector for global width.
+   */
+  div[class*="peer-[.is-not-custom]:peer-[.is-not-center]:max-w-8xl"] {
+    max-width: var(--bagel-shell-max-width-xl) !important;
+  }
+
+  #content-area {
+    max-width: var(--bagel-content-max-width-xl) !important;
+  }
+
+  #sidebar {
+    width: var(--bagel-left-nav-width) !important;
+  }
+
+  #table-of-contents-layout {
+    width: var(--bagel-right-toc-width) !important;
+    max-width: var(--bagel-right-toc-width) !important;
+  }
+
+  #table-of-contents {
+    width: 100% !important;
+  }
+
+  /* Remove centered navbar max-width so top tabs can sit near the right edge */
+  #navbar > .max-w-8xl {
+    max-width: none !important;
+    width: 100%;
+    padding-left: var(--bagel-navbar-inline-padding-xl);
+    padding-right: var(--bagel-navbar-inline-padding-xl);
+  }
+
+  #navbar > .max-w-8xl > .relative > .flex {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }
