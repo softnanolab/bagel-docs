@@ -1,0 +1,33 @@
+name: Docs Quality
+
+on:
+  pull_request:
+    paths:
+      - '**/*.mdx'
+      - 'docs.json'
+      - 'scripts/validate_snippets.py'
+      - '.github/workflows/docs-quality.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.mdx'
+      - 'docs.json'
+      - 'scripts/validate_snippets.py'
+      - '.github/workflows/docs-quality.yml'
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate docs snippets and placeholders
+        run: |
+          python scripts/validate_snippets.py --root . --import-check
