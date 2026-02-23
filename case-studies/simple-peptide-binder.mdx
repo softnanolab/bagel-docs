@@ -1,7 +1,34 @@
 ---
 title: "Simple Peptide Binder"
-description: "Design a peptide binder against a target protein using BAGEL"
+description: "Stub: BAGEL peptide binder workflow mapped to source scripts"
 icon: "link"
 ---
 
-A step-by-step walkthrough of designing a short peptide binder from scratch.
+## Objective
+
+Stub page for the BAGEL peptide-binder design workflow. This page is intentionally source-mapped only and will be expanded into a full tutorial later.
+
+## Source scripts
+
+- `bagel/scripts/binders/simple_binder.py`
+- `bagel/scripts/technical-report/binders/ca4.py`
+- `bagel/scripts/technical-report/binders/derf7.py`
+- `bagel/scripts/technical-report/binders/egfr.py`
+
+## Current status
+
+- Status: `Stub`
+- Expansion state: planned
+
+## Known dependencies
+
+- BAGEL (`biobagel`) installation
+- Oracle backend: Modal (`use_modal=True`) or local GPU (`use_modal=False`)
+- ESMFold oracle for structure-driven energy terms
+
+## Expansion checklist
+
+- [ ] Add runnable end-to-end script with explicit parameters
+- [ ] Add expected outputs (`energies.csv`, FASTA, CIF)
+- [ ] Add troubleshooting for Modal/local execution
+- [ ] Add result-interpretation section for binder quality

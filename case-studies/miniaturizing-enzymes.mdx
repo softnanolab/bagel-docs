@@ -9,7 +9,7 @@ import { MolstarViewer } from '/snippets/MolstarViewer.jsx';
 
 ## Overview
 
-Enzyme miniaturization is a critical challenge in protein engineering, where the goal is to reduce the size of functional enzymes while preserving their catalytic activity. This case study demonstrates how BAGEL (Bayesian Active Learning for Genetic Engineering of Ligands) can be used to design miniaturized enzymes through iterative optimization.
+Enzyme miniaturization is a critical challenge in protein engineering, where the goal is to reduce the size of functional enzymes while preserving their catalytic activity. This case study demonstrates how BAGEL (*Biomolecular Algorithm for Guidance in Energy Landscapes*) can be used to design miniaturized enzymes through iterative optimization.
 
 The challenge lies in identifying which regions of an enzyme can be removed or shortened without compromising its essential structure and function. Traditional approaches often rely on manual inspection and trial-and-error, but BAGEL enables a more systematic, data-driven approach to this problem.
 
@@ -37,7 +37,7 @@ The BAGEL-driven miniaturization process follows these key steps:
 
 2. **Define Mutable Regions**: Identify regions that can potentially be shortened or modified without disrupting the enzyme's core function (shown in coral-red above).
 
-3. **Iterative Optimization**: Use BAGEL's Bayesian optimization framework to intelligently explore the space of possible miniaturized variants, learning from each experiment to guide the next round of designs.
+3. **Iterative Optimization**: Use BAGEL's energy-landscape optimization framework to explore the space of possible miniaturized variants, learning from each experiment to guide the next round of designs.
 
 4. **Weight-Based Selection**: Different "weight" parameters (0.0001, 0.0005, 0.001, 0.005, 0.01) control the trade-off between size reduction and functional preservation.
 
@@ -84,5 +84,5 @@ This case study represents an initial exploration of enzyme miniaturization with
 To explore BAGEL further or apply it to your own protein engineering projects:
 
 - Review the [BAGEL documentation](/index)
-- Try the [quickstart guide](/quickstart) to set up your own experiments
-- Explore additional [customization options](/essentials/settings) for advanced use cases
+- Try the [getting started guide](/getting-started) to set up your own experiments
+- Explore [customization guides](/customization/custom-energy-terms) for advanced use cases

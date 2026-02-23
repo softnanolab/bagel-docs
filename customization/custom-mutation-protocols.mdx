@@ -8,8 +8,146 @@ Mutation protocols control how sequences are perturbed at each step. This guide 
 
 ## The MutationProtocol base class
 
+All mutation protocols inherit from `MutationProtocol`, a dataclass with an abstract `one_step()` method. The base class provides:
+
+- **`mutation_bias`** — a dictionary mapping amino acid one-letter codes to sampling probabilities (default excludes cysteine to avoid disulfide complications)
+- **`n_mutations`** — number of mutations to attempt per step (default 1)
+- **`exclude_self`** — if `True`, the current amino acid is excluded from the sampling distribution (default `True`)
+
 ## Implementing one_step()
+
+The `one_step()` method receives a `System` and must return a tuple of `(mutated_system, mutation_record)`:
+
+```python
+from dataclasses import dataclass
+from bagel.mutation import MutationProtocol, Mutation, MutationRecord
+from bagel.system import System
+
+
+@dataclass
+class MyProtocol(MutationProtocol):
+    def one_step(self, system: System) -> tuple[System, MutationRecord]:
+        # Always work on a copy
+        mutated_system = system.__copy__()
+        mutations: list[Mutation] = []
+
+        for _ in range(self.n_mutations):
+            # Choose a chain and perform your mutation logic
+            chain = self.choose_chain(mutated_system)
+            mutation = self.mutate_random_residue(chain)
+            mutations.append(mutation)
+
+        return mutated_system, MutationRecord(mutations=mutations)
+```
+
+Key rules:
+- **Always copy the system** with `system.__copy__()` before modifying it — the minimizer needs the original for energy comparison
+- **Return a `MutationRecord`** with all `Mutation` objects — this enables replay and logging
+- Mutations to a chain are automatically reflected in all states sharing that chain
+
+## Mutation and MutationRecord
+
+Each `Mutation` is a frozen dataclass recording a single mutation operation:
+
+```python
+@dataclass(frozen=True)
+class Mutation:
+    chain_id: str                # which chain was mutated
+    move_type: str | None        # 'substitution', 'addition', 'removal', or None
+    residue_index: int | None    # position in the chain
+    old_amino_acid: str | None   # previous AA (None for additions)
+    new_amino_acid: str | None   # new AA (None for removals)
+```
+
+A `MutationRecord` is simply a list of `Mutation` objects from a single `one_step()` call.
 
 ## Using built-in utilities
 
+The base class provides helper methods you can use in your protocol:
+
+- **`choose_chain(system)`** — selects a chain with probability proportional to its number of mutable residues. This ensures chains with more mutable positions are mutated more frequently.
+- **`mutate_random_residue(chain)`** — picks a random mutable residue on the chain and resamples its amino acid from `mutation_bias` (excluding the current AA if `exclude_self=True`). Returns a `Mutation` object.
+- **`replay(system, mutation_record)`** — replays a recorded mutation on a fresh system copy. Useful for deterministic reproduction of trajectories.
+
 ## Example: a custom mutation protocol
+
+Here is a mutation protocol that biases toward specific amino acids based on their position in the chain. Residues near the N-terminus are biased toward charged amino acids (for solubility), while residues near the C-terminus are biased toward hydrophobic amino acids (for core packing):
+
+```python
+import numpy as np
+from dataclasses import dataclass, field
+from typing import Dict
+from bagel.mutation import MutationProtocol, Mutation, MutationRecord
+from bagel.system import System
+from bagel.constants import mutation_bias_no_cystein
+
+
+CHARGED_AAS = {"D", "E", "K", "R"}
+HYDROPHOBIC_AAS = {"A", "I", "L", "M", "F", "V", "W"}
+
+
+@dataclass
+class PositionBiasedProtocol(MutationProtocol):
+    """Biases mutations based on residue position in the chain."""
+
+    bias_strength: float = 3.0  # how much to upweight favored AAs
+
+    def one_step(self, system: System) -> tuple[System, MutationRecord]:
+        mutated_system = system.__copy__()
+        mutations: list[Mutation] = []
+
+        for _ in range(self.n_mutations):
+            chain = self.choose_chain(mutated_system)
+            index = np.random.choice(chain.mutable_residue_indexes)
+
+            # Determine position bias
+            relative_pos = index / max(chain.length - 1, 1)
+            if relative_pos < 0.3:
+                favored = CHARGED_AAS
+            elif relative_pos > 0.7:
+                favored = HYDROPHOBIC_AAS
+            else:
+                favored = set()
+
+            # Build biased probability distribution
+            aa_keys = list(self.mutation_bias.keys())
+            probs = np.array([self.mutation_bias[a] for a in aa_keys], dtype=float)
+
+            # Upweight favored amino acids
+            for i, aa in enumerate(aa_keys):
+                if aa in favored:
+                    probs[i] *= self.bias_strength
+
+            # Exclude current AA
+            current_aa = chain.residues[index].name
+            if self.exclude_self:
+                probs[aa_keys.index(current_aa)] = 0.0
+
+            probs /= probs.sum()
+            new_aa = np.random.choice(aa_keys, p=probs)
+
+            chain.mutate_residue(index=index, amino_acid=new_aa)
+            mutations.append(Mutation(
+                chain_id=chain.chain_ID,
+                move_type="substitution",
+                residue_index=index,
+                old_amino_acid=current_aa,
+                new_amino_acid=new_aa,
+            ))
+
+        return mutated_system, MutationRecord(mutations=mutations)
+```
+
+Usage:
+
+```python
+import bagel as bg
+
+minimizer = bg.minimizer.SimulatedAnnealing(
+    mutator=PositionBiasedProtocol(n_mutations=1, bias_strength=5.0),
+    initial_temperature=0.2,
+    final_temperature=0.05,
+    n_steps=1000,
+    callbacks=[bg.callbacks.DefaultLogger(log_interval=1)],
+)
+```

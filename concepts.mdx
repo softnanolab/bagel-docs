@@ -8,12 +8,147 @@ This page explains the key ideas behind BAGEL and how its components fit togethe
 
 ## The energy landscape
 
+BAGEL formalizes protein design as the sampling of an energy function over sequence space. Rather than following the traditional inverse-folding pipeline (backbone design → sequence painting → folding), BAGEL lets you define what you want directly as a set of energy terms and then searches for sequences that minimize the total energy.
+
+A **System** $\Omega$ defines the full energy landscape:
+
+$$
+E_\Omega = \sum_{S \in \Omega} E_S
+$$
+
+Each **State** $S$ contributes its own energy, computed as a weighted sum of individual energy terms:
+
+$$
+E_S = \sum_{j}^{N_S} w_{js}\,\epsilon_{js}(\{C\}_S)
+$$
+
+where $w_{js}$ is the weight of energy term $j$ in state $S$, $\epsilon_{js}$ is the unweighted energy value, and $\{C\}_S$ is the set of chains in that state.
+
+This formulation lets you encode arbitrary design objectives — structural constraints, confidence metrics, embedding similarities, geometric properties — as energy terms and combine them freely.
+
 ## System, State, Chain, Residue
+
+BAGEL organizes proteins into a four-level hierarchy:
+
+- **System** — the top-level container holding all states. The total energy $E_\Omega$ is the sum of all state energies.
+- **State** — a specific context for evaluating a set of chains against a set of energy terms. For example, a binder–target complex is one state; the same binder with a different target is another state.
+- **Chain** — a single polypeptide sequence $C_i = \vec{\sigma}_i \in \mathcal{A}^{L_i}$, where $\mathcal{A}$ is the amino acid alphabet. Chains can be shared across states — when a shared chain is mutated, all states containing it update automatically.
+- **Residue** — a single amino acid position. Each residue is either **mutable** (allowed to change during optimization) or **immutable** (fixed).
+
+```python
+import bagel as bg
+
+# Create residues for a 30-residue mutable binder
+binder_residues = [
+    bg.Residue(name="G", chain_ID="A", index=i, mutable=True)
+    for i in range(30)
+]
+binder = bg.Chain(binder_residues)
+
+# Create an immutable target chain
+target_residues = [
+    bg.Residue(name=aa, chain_ID="B", index=i, mutable=False)
+    for i, aa in enumerate(target_sequence)
+]
+target = bg.Chain(target_residues)
+
+# Combine into a state with energy terms
+state = bg.State(
+    chains=[binder, target],
+    energy_terms=[...],
+    name="binding",
+)
+
+# Create the system
+system = bg.System([state])
+```
+
+**Multi-state design** is a key strength of BAGEL. Chains can be shared across states — for example, you can optimize a single binder sequence to bind one target (state A) while avoiding another (state B), simply by using positive weights in state A and negative weights in state B.
 
 ## Oracles
 
+An **oracle** is any algorithm that maps a set of chains to a useful representation. Oracles provide the predictions that energy terms use to evaluate designs.
+
+BAGEL defines three categories of oracles:
+
+**Folding oracles** predict 3D structures and associated confidence metrics:
+
+$$
+f_{\mathrm{fold}} : \{C\}_S \mapsto (\mathbf{X}, \Phi)
+$$
+
+where $\mathbf{X}$ are atomic coordinates and $\Phi$ encodes confidence metrics (pLDDT, pTM, PAE). Currently implemented: `ESMFold`.
+
+**Embedding oracles** produce learned high-dimensional features capturing biochemical or evolutionary context:
+
+$$
+f_{\mathrm{embed}} : \{C\}_S \mapsto \vec{z}
+$$
+
+where $\vec{z}$ is a per-residue embedding vector. Currently implemented: `ESM2`.
+
+**Property oracles** compute scalar properties from sequences:
+
+$$
+f_{\mathrm{property}} : \{C\}_S \mapsto r
+$$
+
+For example, counting polar residues or predicting unfolding temperature.
+
+<Info>
+BAGEL uses [boileroom](/boileroom-api/overview) to run oracle inference. boileroom provides a unified Python API for protein prediction models, with support for serverless GPU execution via Modal or local GPU execution. See the [boileroom documentation](/boileroom-api/overview) for details on available models and setup.
+</Info>
+
 ## Energy terms
+
+Energy terms $\epsilon_{js}$ encode specific design objectives. Each term is associated with an oracle and operates on one or more **residue groups** — subsets of residues within a chain.
+
+BAGEL adopts an N-body formalism:
+- **Zero-body terms** apply globally to all residues (e.g., `PTMEnergy`, `OverallPLDDTEnergy`)
+- **One-body terms** act on a single residue group (e.g., `PLDDTEnergy`, `HydrophobicEnergy`)
+- **Two-body terms** operate on a pair of residue groups (e.g., `PAEEnergy`, `SeparationEnergy`)
+
+All energy terms are bounded scalar values. By convention, lower energy is better, and unweighted values are normalized to the 0–1 range where possible.
+
+Built-in energy terms include:
+
+| Category | Terms |
+|----------|-------|
+| Folding metrics | `PTMEnergy`, `PLDDTEnergy`, `OverallPLDDTEnergy`, `PAEEnergy` |
+| Structural | `SurfaceAreaEnergy`, `SeparationEnergy`, `GlobularEnergy`, `TemplateMatchEnergy`, `SecondaryStructureEnergy`, `RingSymmetryEnergy` |
+| Sequence | `HydrophobicEnergy`, `ChemicalPotentialEnergy` |
+| Embedding | `EmbeddingsSimilarityEnergy` |
+| Composite | `LISEnergy`, `FlexEvoBindEnergy` |
+
+See the [BAGEL API reference](/bagel-api/energies/energy-term) for details on each term.
 
 ## Mutation protocols
 
+**Mutation protocols** define how BAGEL explores sequence space by proposing changes to chain sequences.
+
+**Canonical** — fixed-length point mutations. At each step:
+1. Pick a chain with probability proportional to its number of mutable residues
+2. Draw $n_{\mathrm{mut}}$ residues uniformly from that chain
+3. Resample their amino acid identity from a categorical distribution $p_{\mathrm{mut}}$ (by default, cysteines are excluded to avoid disulfide bond complications)
+
+**GrandCanonical** — extends canonical with length-changing moves (insertions and deletions), sampling a grand-canonical ensemble where sequence length fluctuates. For each attempted move, a move type is drawn from $\{\text{substitution}, \text{addition}, \text{removal}\}$ with user-defined probabilities. Use together with `ChemicalPotentialEnergy` to control the target sequence length.
+
 ## The Monte Carlo loop
+
+BAGEL explores the energy landscape using Markov Chain Monte Carlo (MCMC). At each step $n$, a mutation is proposed and accepted or rejected according to the Metropolis criterion:
+
+$$
+p_{\mathrm{accept}} = \min\left(1, \exp\left(-\frac{\Delta E}{T}\right)\right)
+$$
+
+where $\Delta E = E_\Omega(\{C\}^{n+1}) - E_\Omega(\{C\}^n)$ and $T$ is the temperature at step $n$.
+
+BAGEL provides three minimizer strategies:
+
+- **MonteCarloMinimizer** — general MC with a user-defined temperature schedule (constant, custom array, etc.). At constant temperature, this acts as a sampler for generating diverse candidates around an energy basin.
+- **SimulatedAnnealing** — linearly decreasing temperature from $T_{\mathrm{initial}}$ to $T_{\mathrm{final}}$. Used for optimization, gradually narrowing the search.
+- **SimulatedTempering** — cyclical schedule alternating between $T_{\mathrm{low}}$ and $T_{\mathrm{high}}$ across multiple cycles. The high-temperature phases help escape local minima, while low-temperature phases refine the current best solution.
+
+The choice of minimizer depends on the design goal:
+- For **optimization** (finding the best single design), use `SimulatedAnnealing` or `SimulatedTempering`.
+- For **sampling** (generating diverse candidates), use `MonteCarloMinimizer` at constant temperature.

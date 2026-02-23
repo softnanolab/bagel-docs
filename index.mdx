@@ -1,11 +1,9 @@
 ---
 title: "Introduction"
-description: "BAGEL — Protein Engineering via Exploration of an Energy Landscape"
+description: "BAGEL — Biomolecular Algorithm for Guidance in Energy Landscapes"
 ---
 
-<Warning>
-This documentation is work in progress and should not be referred to.
-</Warning>
+BAGEL is a modular, open-source Python framework for programmable protein engineering. It formalizes protein design as optimization over an energy landscape, letting you define arbitrary design objectives as energy terms and explore sequence space with gradient-free Monte Carlo methods.
 
 ## Getting started
 
@@ -24,7 +22,7 @@ This documentation is work in progress and should not be referred to.
   href="/concepts"
   horizontal
 >
-  Understand the core abstractions and design principles behind BAGEL.
+  Understand the energy landscape, system hierarchy, oracles, and Monte Carlo optimization.
 </Card>
 
 ## Customization
@@ -42,21 +40,28 @@ This documentation is work in progress and should not be referred to.
     icon="shuffle"
     href="/customization/custom-mutation-protocols"
   >
-    Define how BAGEL explores sequence space.
+    Control how BAGEL explores sequence space with custom mutation logic.
   </Card>
   <Card
     title="Custom Minimizers"
     icon="chart-line-down"
     href="/customization/custom-minimizers"
   >
-    Implement your own optimization strategy.
+    Implement your own optimization or sampling strategy.
   </Card>
   <Card
     title="Custom Oracles"
     icon="eye"
     href="/customization/custom-oracles"
   >
-    Plug in new ML models as oracles.
+    Plug in new ML models as oracles for structure, embeddings, or properties.
+  </Card>
+  <Card
+    title="Custom Callbacks"
+    icon="bell"
+    href="/customization/custom-callbacks"
+  >
+    Add custom logging, checkpointing, and early stopping to optimization runs.
   </Card>
 </Columns>
 
@@ -82,6 +87,6 @@ This documentation is work in progress and should not be referred to.
     icon="flask-vial"
     href="/case-studies/enzyme-variants"
   >
-    Design functional enzyme variants.
+    Design functional enzyme variants with conserved active sites.
   </Card>
 </Columns>

@@ -8,8 +8,122 @@ This guide will get you from zero to your first BAGEL protein design run.
 
 ## Prerequisites
 
+- Python 3.11-3.13
+- pip (or [uv](https://docs.astral.sh/uv/) for development)
+- A [Modal](https://modal.com) account for serverless oracle inference, **or** a local GPU with sufficient VRAM
+
 ## Installation
+
+Install BAGEL from PyPI:
+
+```bash
+pip install biobagel
+```
+
+For local GPU execution of protein models (instead of Modal):
+
+```bash
+pip install biobagel[local]
+```
+
+## Oracle setup
+
+BAGEL uses [boileroom](/boileroom-api/overview) to run oracle inference — the ML model predictions (structure folding, embeddings) that energy terms depend on. You have two options:
+
+<CardGroup cols={2}>
+  <Card title="Modal (serverless)" icon="cloud">
+    No GPU required. Models run on Modal's serverless infrastructure. You need a Modal account with credits.
+
+    ```bash
+    pip install modal
+    modal token new
+    ```
+
+    Then pass `use_modal=True` when creating oracles.
+  </Card>
+  <Card title="Local GPU" icon="microchip">
+    Requires a GPU with sufficient VRAM (16 GB+ recommended). Install with:
+
+    ```bash
+    pip install biobagel[local]
+    ```
+
+    Then pass `use_modal=False` when creating oracles.
+  </Card>
+</CardGroup>
+
+See the [boileroom getting started guide](/boileroom-api/getting-started) for details on backend configuration.
 
 ## Your first design
 
+Here is a minimal example that designs a 30-residue protein scaffold using simulated annealing. The design goal is a confident, globular structure with low surface hydrophobicity:
+
+```python
+import numpy as np
+import bagel as bg
+
+# Generate a random starting sequence
+sequence = np.random.choice(list(bg.constants.aa_dict.keys()), size=30)
+
+# Create mutable residues and chain
+residues = [
+    bg.Residue(name=aa, chain_ID="A", index=i, mutable=True)
+    for i, aa in enumerate(sequence)
+]
+chain = bg.Chain(residues)
+
+# Set up the folding oracle (ESMFold via Modal)
+esmfold = bg.oracles.ESMFold(use_modal=True)
+
+# Define energy terms
+state = bg.State(
+    chains=[chain],
+    energy_terms=[
+        bg.energies.PTMEnergy(oracle=esmfold, weight=1.0),
+        bg.energies.OverallPLDDTEnergy(oracle=esmfold, weight=1.0),
+        bg.energies.HydrophobicEnergy(oracle=esmfold, weight=3.0, mode="surface"),
+        bg.energies.GlobularEnergy(oracle=esmfold, weight=1.0, residues=residues),
+    ],
+    name="scaffold",
+)
+
+# Run simulated annealing
+minimizer = bg.minimizer.SimulatedAnnealing(
+    mutator=bg.mutation.Canonical(),
+    initial_temperature=0.2,
+    final_temperature=0.05,
+    n_steps=500,
+    callbacks=[
+        bg.callbacks.DefaultLogger(log_interval=1),
+        bg.callbacks.FoldingLogger(folding_oracle=esmfold, log_interval=50),
+    ],
+)
+
+best_system = minimizer.minimize_system(system=bg.System([state]))
+```
+
+This script will:
+1. Start from a random 30-residue sequence
+2. Fold each candidate with ESMFold
+3. Evaluate pTM, pLDDT, hydrophobicity, and globularity
+4. Accept or reject mutations based on the Metropolis criterion
+5. Return the best system found after 500 steps
+
+Output files are saved to a timestamped directory alongside your script, including energy traces, sequences (FASTA), and predicted structures (CIF).
+
 ## What's next
+
+<CardGroup cols={2}>
+  <Card title="Concepts" icon="diagram-project" href="/concepts">
+    Understand the energy landscape, system hierarchy, and Monte Carlo optimization.
+  </Card>
+  <Card title="Energy Terms" icon="bolt" href="/bagel-api/energies/energy-term">
+    Explore all built-in energy terms and their parameters.
+  </Card>
+  <Card title="Customization" icon="wrench" href="/customization/custom-energy-terms">
+    Write your own energy terms, minimizers, mutation protocols, oracles, and callbacks.
+  </Card>
+  <Card title="Case Studies" icon="flask-vial" href="/case-studies/simple-peptide-binder">
+    See complete design workflows for binders, scaffolds, and enzyme variants.
+  </Card>
+</CardGroup>

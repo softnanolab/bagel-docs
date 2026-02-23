@@ -8,8 +8,137 @@ Callbacks hook into the optimization loop for logging, visualization, and contro
 
 ## The Callback base class
 
+All callbacks inherit from `Callback` (defined in `bagel/callbacks.py`). The base class provides three hook methods, all with default no-op implementations — override only the ones you need:
+
+```python
+from bagel.callbacks import Callback, CallbackContext
+
+
+class MyCallback(Callback):
+    def on_optimization_start(self, context: CallbackContext) -> None:
+        """Called once before the optimization loop begins."""
+        pass
+
+    def on_step_end(self, context: CallbackContext) -> None:
+        """Called after each optimization step."""
+        pass
+
+    def on_optimization_end(self, context: CallbackContext) -> None:
+        """Called once after the optimization loop completes."""
+        pass
+```
+
 ## Available hooks
+
+### on_optimization_start(context)
+
+Called once before the first optimization step. Use this to:
+- Initialize logging files or connections
+- Record initial system state
+- Set up resources needed during optimization
+
+### on_step_end(context)
+
+Called after every optimization step. This is the main hook for:
+- Logging metrics and progress
+- Saving checkpoints
+- Triggering early stopping (set `self._should_stop = True`)
+- Monitoring convergence
+
+All registered callbacks execute even if one triggers early stopping, so logging callbacks can always complete their work.
+
+### on_optimization_end(context)
+
+Called once after the loop finishes (or after early stopping). Use this to:
+- Write final summaries
+- Close file handles or connections
+- Generate final reports
 
 ## Accessing context
 
+Every hook receives a `CallbackContext` dataclass with these fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `step` | `int` | Current step number (0 = before optimization, 1..N = after each step) |
+| `system` | `System` | Current system state |
+| `best_system` | `System` | Best system found so far |
+| `new_best` | `bool` | Whether this step found a new best system |
+| `metrics` | `dict[str, float]` | Extracted energy metrics |
+| `minimizer` | `Minimizer` | Reference to the running minimizer |
+| `step_kwargs` | `dict[str, Any]` | Step-specific info (e.g., `temperature`, `accept`) |
+
+The `metrics` dictionary includes:
+- `"system_energy"` — total energy of the current system
+- `"best_system_energy"` — total energy of the best system
+- `"{state_name}/{energy_name}"` — individual energy term values
+- `"{state_name}/state_energy"` — total energy per state
+
 ## Example: a custom callback
+
+Here is a callback that saves checkpoint structures every N steps:
+
+```python
+import pathlib as pl
+from bagel.callbacks import Callback, CallbackContext
+
+
+class CheckpointCallback(Callback):
+    """Saves the best system's sequences to a FASTA file every N steps."""
+
+    def __init__(self, checkpoint_interval: int = 100, output_dir: str = "checkpoints"):
+        self.checkpoint_interval = checkpoint_interval
+        self.output_dir = pl.Path(output_dir)
+
+    def on_optimization_start(self, context: CallbackContext) -> None:
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def on_step_end(self, context: CallbackContext) -> None:
+        if context.step % self.checkpoint_interval != 0:
+            return
+
+        # Save best system sequences
+        filepath = self.output_dir / f"checkpoint_step_{context.step}.fasta"
+        with open(filepath, "w") as f:
+            for state in context.best_system.states:
+                f.write(f">{state.name}_step{context.step}\n")
+                f.write(f"{':'.join(state.total_sequence)}\n")
+
+        # Log energy progress
+        energy = context.metrics.get("best_system_energy", float("inf"))
+        print(f"Step {context.step}: best energy = {energy:.4f}")
+
+    def on_optimization_end(self, context: CallbackContext) -> None:
+        # Save final summary
+        filepath = self.output_dir / "final_summary.txt"
+        with open(filepath, "w") as f:
+            f.write(f"Final best energy: {context.metrics['best_system_energy']:.4f}\n")
+            f.write(f"Total steps: {context.step}\n")
+            for state in context.best_system.states:
+                f.write(f"\n{state.name}:\n")
+                f.write(f"  Sequence: {':'.join(state.total_sequence)}\n")
+```
+
+Usage:
+
+```python
+import bagel as bg
+
+minimizer = bg.minimizer.SimulatedAnnealing(
+    mutator=bg.mutation.Canonical(),
+    initial_temperature=0.2,
+    final_temperature=0.05,
+    n_steps=1000,
+    callbacks=[
+        bg.callbacks.DefaultLogger(log_interval=1),
+        bg.callbacks.FoldingLogger(folding_oracle=esmfold, log_interval=50),
+        CheckpointCallback(checkpoint_interval=200),
+    ],
+)
+```
+
+BAGEL also ships with built-in callbacks:
+- **`DefaultLogger`** — writes energies, sequences, and masks to CSV/FASTA files
+- **`FoldingLogger`** — saves CIF structures and oracle attributes (pLDDT, PAE arrays)
+- **`EarlyStopping`** — monitors a metric and stops when it plateaus
+- **`WandBLogger`** — logs metrics to Weights & Biases for experiment tracking

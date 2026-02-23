@@ -8,8 +8,136 @@ Minimizers drive the optimization loop. This guide shows you how to create your 
 
 ## The Minimizer base class
 
+BAGEL provides two levels of abstraction for custom minimizers:
+
+1. **`Minimizer`** — full control over the optimization loop. You implement `minimize_system()` from scratch.
+2. **`MonteCarloMinimizer`** — MCMC with hooks. You get the Metropolis accept/reject loop for free and override `_before_step()` and/or `_after_step()` to customize behavior.
+
+Most custom minimizers should extend `MonteCarloMinimizer`, which handles:
+- Temperature schedule management
+- Metropolis acceptance criterion
+- Callback execution
+- Logging infrastructure
+- Best-system tracking
+
 ## Implementing minimize_system()
 
-## Working with callbacks
+If you need full control (e.g., for a non-MCMC algorithm like a genetic algorithm), subclass `Minimizer` directly:
+
+```python
+from bagel.minimizer import Minimizer
+from bagel.system import System
+from bagel.mutation import MutationProtocol
+
+
+class MyMinimizer(Minimizer):
+    def __init__(self, mutator: MutationProtocol, n_steps: int, **kwargs):
+        super().__init__(mutator=mutator, **kwargs)
+        self.n_steps = n_steps
+
+    def minimize_system(self, system: System) -> System:
+        system.get_total_energy()
+        best_system = system.__copy__()
+
+        for step in range(1, self.n_steps + 1):
+            # Propose a mutation
+            candidate, record = self.mutator.one_step(system.__copy__())
+            candidate.get_total_energy()
+
+            # Your custom acceptance logic here
+            if self.should_accept(system, candidate):
+                system = candidate
+
+            if system.get_total_energy() < best_system.get_total_energy():
+                best_system = system.__copy__()
+
+        return best_system
+```
+
+## Using MonteCarloMinimizer hooks
+
+For MCMC-based approaches, extend `MonteCarloMinimizer` and override the hooks:
+
+**`_before_step(system, step) -> System`** — called before each MC step. Use this to modify the system before the mutation is proposed (e.g., adjust parameters based on progress).
+
+**`_after_step(system, best_system, step, new_best, accept, **kwargs) -> (System, should_stop)`** — called after each MC step. The base implementation handles callback execution, best-system preservation, and logging. Return `(system, should_stop)` where `should_stop=True` triggers early termination.
+
+The built-in `SimulatedAnnealing` and `SimulatedTempering` are both implemented as `MonteCarloMinimizer` subclasses — they only differ in how they construct the temperature schedule.
+
+## MonteCarloMinimizer parameters
+
+When subclassing `MonteCarloMinimizer`, pass these to `super().__init__()`:
+
+- **`mutator`** — the `MutationProtocol` to use for proposing sequence changes
+- **`temperature`** — a float (constant), list, or numpy array defining the temperature at each step
+- **`n_steps`** — total number of MC steps
+- **`acceptance_criterion`** — currently `"metropolis"` (default)
+- **`preserve_best_system_every_n_steps`** — if set, resets the current system to the best system every N steps
+- **`callbacks`** — list of `Callback` instances for logging and monitoring
 
 ## Example: a custom minimizer
+
+Here is a minimizer that implements an exponential cooling schedule (instead of linear):
+
+```python
+import numpy as np
+from bagel.minimizer import MonteCarloMinimizer
+from bagel.mutation import MutationProtocol
+from bagel.callbacks import Callback
+import pathlib as pl
+from typing import Any
+
+
+class ExponentialAnnealing(MonteCarloMinimizer):
+    """Simulated annealing with exponential temperature decay."""
+
+    def __init__(
+        self,
+        mutator: MutationProtocol,
+        initial_temperature: float,
+        final_temperature: float,
+        n_steps: int,
+        experiment_name: str | None = None,
+        log_frequency: int = 100,
+        log_path: pl.Path | str | None = None,
+        callbacks: list[Callback] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        if experiment_name is None:
+            experiment_name = f"exponential_annealing"
+
+        super().__init__(
+            mutator=mutator,
+            temperature=initial_temperature,  # placeholder, overwritten below
+            n_steps=n_steps,
+            experiment_name=experiment_name,
+            log_frequency=log_frequency,
+            log_path=log_path,
+            callbacks=callbacks,
+            **kwargs,
+        )
+
+        # Overwrite the temperature schedule with exponential decay
+        self.temperature_schedule = initial_temperature * np.exp(
+            np.linspace(0, np.log(final_temperature / initial_temperature), n_steps)
+        )
+```
+
+Usage:
+
+```python
+import bagel as bg
+
+minimizer = ExponentialAnnealing(
+    mutator=bg.mutation.Canonical(),
+    initial_temperature=1.0,
+    final_temperature=0.01,
+    n_steps=1000,
+    callbacks=[
+        bg.callbacks.DefaultLogger(log_interval=1),
+        bg.callbacks.FoldingLogger(folding_oracle=esmfold, log_interval=50),
+    ],
+)
+
+best_system = minimizer.minimize_system(system=bg.System([state]))
+```

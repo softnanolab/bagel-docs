@@ -1,7 +1,35 @@
 ---
 title: "Targeting Intrinsically Disordered Regions"
-description: "Design binders for intrinsically disordered protein regions with BAGEL"
+description: "Stub: BAGEL IDR-targeting workflows mapped to source scripts"
 icon: "crosshairs"
 ---
 
-A case study on designing binders that target intrinsically disordered regions, which lack stable 3D structure and pose unique challenges for computational design.
+## Objective
+
+Stub page for BAGEL workflows that design binders against intrinsically disordered regions (IDRs). Content is intentionally limited to source mapping for now.
+
+## Source scripts
+
+- `bagel/scripts/technical-report/disordered/asyn.py`
+- `bagel/scripts/technical-report/disordered/cd28.py`
+- `bagel/scripts/technical-report/disordered/p53.py`
+- `bagel/scripts/technical-report/disordered/sumo1.py`
+
+## Current status
+
+- Status: `Stub`
+- Expansion state: planned
+
+## Known dependencies
+
+- BAGEL (`biobagel`) installation
+- Oracle backend: Modal or local GPU
+- Structure-based terms (for target + binder states)
+- Multi-state optimization setup for selectivity workflows
+
+## Expansion checklist
+
+- [ ] Add one canonical IDR binder script walkthrough
+- [ ] Add multi-state setup example (target/off-target)
+- [ ] Add output interpretation for confidence and interface terms
+- [ ] Add reproducibility notes (stochastic optimization)
