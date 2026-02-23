@@ -62,5 +62,12 @@ Minimize system using Monte Carlo method.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+minimizer = bg.minimizer.MonteCarloMinimizer(
+    mutator=bg.mutation.Canonical(n_mutations=1),
+    temperature=0.2,
+    n_steps=100,
+    callbacks=[bg.callbacks.DefaultLogger(log_interval=10)],
+)
 ```

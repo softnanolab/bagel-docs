@@ -3,6 +3,19 @@ title: "EmbeddingsSimilarityEnergy"
 description: "Energy terms measuring the cosine similarity between current embeddings and embeddings of a template. See paper: Rajendran et al. 2025 - to be published"
 ---
 
+## Definition
+
+The embedding similarity energy measures how much the current per-residue embeddings deviate from reference embeddings, using cosine similarity.
+
+$$
+E_{\mathrm{embedding}} = 1 - \frac{1}{N_G} \sum_{\alpha \in G} \cos(\mathbf{e}_\alpha, \mathbf{e}_\alpha^{\mathrm{ref}})
+$$
+
+- $\mathbf{e}_\alpha$ is the current embedding vector for residue $\alpha$ (L2-normalized)
+- $\mathbf{e}_\alpha^{\mathrm{ref}}$ is the reference embedding vector for residue $\alpha$ (L2-normalized)
+- $\cos(\cdot, \cdot)$ is the cosine similarity
+- $N_G$ is the number of residues in the group $G$
+
 ## Parameters
 
 <ResponseField name="oracle" type="EmbeddingOracle" required>
@@ -46,5 +59,35 @@ Returns the indices of the conserved residues (stored in .residue_group[0]) in t
 ## Example
 
 ```python
-{/* TODO: add example */}
+import numpy as np
+import bagel as bg
+
+# Define residues with some conserved (immutable) positions
+residues = [
+    bg.Residue(name=aa, chain_ID="A", index=i, mutable=(i < 20 or i > 40))
+    for i, aa in enumerate(sequence)
+]
+conserved_residues = [r for r in residues if not r.mutable]
+chain = bg.Chain(residues=residues)
+
+# Create the embedding oracle and extract reference embeddings
+esm2 = bg.oracles.ESM2(config={"model_name": "esm2_t33_650M_UR50D"})
+result = esm2.embed(chains=[chain])
+immutable_mask = ~np.array([r.mutable for r in residues])
+reference_embeddings = result.embeddings[immutable_mask]
+
+# Maintain embedding similarity at conserved positions
+embedding_energy = bg.energies.EmbeddingsSimilarityEnergy(
+    oracle=esm2,
+    residues=conserved_residues,
+    reference_embeddings=reference_embeddings,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[embedding_energy],
+    name="my_state",
+)
 ```

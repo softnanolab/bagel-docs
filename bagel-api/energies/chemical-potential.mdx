@@ -1,12 +1,20 @@
 ---
 title: "ChemicalPotentialEnergy"
-description: "An energy term that purely depends on the number of residues present in a system. Note for statistical mechanics: for some choice of parameters, adding this term is equivalent to making a simulation in the grand-canonical ensemble, where the free-energy that is minimized is:"
+description: "An energy term that purely depends on the number of residues present in a system. Note for statistical mechanics: for some choice of parameters, adding this term is equivalent to making a simulation in the grand-canonical ensemble."
 ---
 
-$\Omega = E - \mu N
+## Definition
 
-where :math:`\Omega` is the grand potential, :math:`E` is the energy, :math:`\mu` is the chemical potential,
-and :math:`N` is the number of residues.
+The chemical potential energy penalizes deviations from a target number of residues.
+
+$$
+E_{\mathrm{chem}} = \mu \left| N_{\mathrm{total}} - N_{\mathrm{target}} \right|^{p}
+$$
+
+- $\mu$ is the chemical potential
+- $N_{\mathrm{total}}$ is the current total number of residues across all chains
+- $N_{\mathrm{target}}$ is the target residue count
+- $p$ is the exponent (default 1)
 
 ## Parameters
 
@@ -46,5 +54,23 @@ and :math:`N` is the number of residues.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create any oracle (ChemicalPotentialEnergy only depends on residue count)
+esmfold = bg.oracles.ESMFold()
+
+# Penalize deviations from a target chain length of 50 residues
+chem_potential = bg.energies.ChemicalPotentialEnergy(
+    oracle=esmfold,
+    target_size=50,
+    chemical_potential=1.0,
+    weight=1.0,
+)
+
+# Add to a state (typically combined with GrandCanonical mutation)
+state = bg.State(
+    chains=[chain],
+    energy_terms=[chem_potential],
+    name="my_state",
+)
 ```

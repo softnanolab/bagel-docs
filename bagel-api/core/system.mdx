@@ -52,5 +52,9 @@ Add a chain to the state.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+state = bg.State(name='state_A', chains=[], energy_terms=[])
+system = bg.System(states=[state], name='example_system')
+system.add_chain(sequence='AAAA', mutability=[1, 1, 0, 0], chain_ID='A', state_index=[0])
 ```

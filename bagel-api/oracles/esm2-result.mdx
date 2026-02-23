@@ -23,5 +23,12 @@ description: "Stores statistics from ESM-2."
 ## Example
 
 ```python
-{/* TODO: add example */}
+import numpy as np
+import bagel as bg
+
+chain = bg.Chain([bg.Residue(name='A', chain_ID='A', index=0)])
+result = bg.oracles.ESM2Result(
+    input_chains=[chain],
+    embeddings=np.zeros((1, 16), dtype=float),
+)
 ```

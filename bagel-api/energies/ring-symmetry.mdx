@@ -3,6 +3,17 @@ title: "RingSymmetryEnergy"
 description: "Energy that maximises the symmetry of different groups. Symmetry is measured by finding the centroid of the backbone of each group and checking how consistently they are spaced from one another."
 ---
 
+## Definition
+
+The ring symmetry energy is the standard deviation of pairwise centroid distances between groups, penalizing asymmetric spacing.
+
+$$
+E_{\mathrm{sym}} = \mathrm{std}\left(d_{G_i, G_j}\right)
+$$
+
+- $d_{G_i, G_j}$ is the distance between the backbone centroids of groups $G_i$ and $G_j$
+- The standard deviation is taken over all unique group pairs (or only direct neighbours if `direct_neighbours_only=True`)
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -41,5 +52,29 @@ description: "Energy that maximises the symmetry of different groups. Symmetry i
 ## Example
 
 ```python
-{/* TODO: add example */}
+import numpy as np
+import bagel as bg
+
+# Create a 190-residue chain
+sequence = np.random.choice(list(bg.constants.aa_dict.keys()), size=190)
+residues = [bg.Residue(name=aa, chain_ID="A", index=i, mutable=True) for i, aa in enumerate(sequence)]
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Define 4 symmetry groups of 40 residues each (with 10-residue gaps)
+symmetry_groups = [residues[i * 50 : (i * 50) + 40] for i in range(4)]
+
+ring_symmetry = bg.energies.RingSymmetryEnergy(
+    oracle=esmfold,
+    symmetry_groups=symmetry_groups,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[bg.Chain(residues)],
+    energy_terms=[ring_symmetry],
+    name="my_state",
+)
 ```

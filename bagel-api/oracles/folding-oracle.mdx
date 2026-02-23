@@ -29,5 +29,10 @@ Predict new structure of chains.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+from biotite.structure import AtomArray
+
+class DummyFoldingOracle(bg.oracles.FoldingOracle):
+    def fold(self, chains: list[bg.Chain]) -> bg.oracles.FoldingResult:
+        return bg.oracles.FoldingResult(input_chains=chains, structure=AtomArray(0))
 ```

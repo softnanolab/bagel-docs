@@ -3,22 +3,34 @@ title: "ESMFold"
 description: "Object that uses ESMFold to predict structure of proteins from sequence."
 ---
 
-WIP: For now we will be using ModalFold to do this reliably without much env issues.
+`ESMFold` is a folding oracle that wraps Meta's ESMFold model for single-sequence protein structure prediction. It returns 3D atomic coordinates along with confidence metrics (pLDDT, pTM, PAE) that are consumed by structure-based energy terms.
+
+For multimer prediction, ESMFold uses either a glycine linker between chains or a gap in positional embeddings (default: skip of 512) to signal chain boundaries. These can be configured via the `config` parameter.
+
+<Info>
+ESMFold inference is powered by [boileroom](/boileroom-api/models/esmfold). boileroom handles model loading, GPU execution, and dependency isolation — either serverlessly via Modal or locally via Apptainer. See the [boileroom ESMFold reference](/boileroom-api/models/esmfold) for backend configuration details.
+</Info>
 
 ## Parameters
 
 <ResponseField name="use_modal" type="bool" default="False">
+  Whether to run ESMFold on Modal's serverless GPU infrastructure. Set to `True` for serverless execution (no local GPU required), or `False` for local GPU execution.
 </ResponseField>
 
 <ResponseField name="config" type="dict[str, Any]" default="{}">
+  Model-specific configuration. Common keys:
+  - `glycine_linker` (str): linker sequence between chains (e.g., `"GGGG"`). Default: no linker.
+  - `position_ids_skip` (int): gap in positional embeddings between chains. Default: `512`.
 </ResponseField>
 
 <ResponseField name="modal_app_context" type="App | None" default="None">
+  Optional Modal app context for reusing an existing Modal session.
 </ResponseField>
 
 ## Attributes
 
 <ResponseField name="result_class" type="Type[ESMFoldResult]">
+  The result class for this oracle. `ESMFoldResult` extends `FoldingResult` with ESMFold-specific attributes (pLDDT, pTM, PAE arrays).
 </ResponseField>
 
 ## Methods
@@ -30,10 +42,27 @@ Fold a list of chains using ESMFold.
 **Parameters**
 
 <ResponseField name="chains" type="List[Chain]" required>
+  The chains to fold. For multimer prediction, pass multiple chains.
 </ResponseField>
 
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create an ESMFold oracle using Modal
+esmfold = bg.oracles.ESMFold(use_modal=True, config={
+    "glycine_linker": "GGGG",
+    "position_ids_skip": 1024,
+})
+
+# Use with energy terms
+state = bg.State(
+    chains=[binder, target],
+    energy_terms=[
+        bg.energies.PTMEnergy(oracle=esmfold, weight=1.0),
+        bg.energies.PLDDTEnergy(oracle=esmfold, weight=1.0, residues=[binder_residues]),
+    ],
+    name="binding",
+)
 ```

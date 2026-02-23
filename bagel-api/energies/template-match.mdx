@@ -3,6 +3,26 @@ title: "TemplateMatchEnergy"
 description: "Energy that drives the structure to match an input-provided template. The difference with the template is always calculated by automatically considering the rotation and translation that best maximize the overlap with the template."
 ---
 
+## Definition
+
+The template match energy measures the structural deviation from a reference template. It supports two modes:
+
+**RMSD mode** (default, `distogram_separation=False`):
+
+$$
+E_{\mathrm{RMSD}} = \mathrm{RMSD}(\mathbf{X}_G, \mathbf{X}_{\mathrm{template}})
+$$
+
+**Distogram mode** (`distogram_separation=True`):
+
+$$
+E_{\mathrm{distogram}} = \frac{1}{N_{\mathrm{pairs}}} \sum_{\alpha,\beta \in G} \left| d_{\alpha\beta} - d_{\alpha\beta}^{\mathrm{template}} \right|
+$$
+
+- $\mathbf{X}_G$ are the atom positions of the selected residues after optimal superposition
+- $\mathbf{X}_{\mathrm{template}}$ are the template atom positions
+- $d_{\alpha\beta}$ and $d_{\alpha\beta}^{\mathrm{template}}$ are pairwise distances in the structure and template, respectively
+
 ## Parameters
 
 <ResponseField name="oracle" type="Oracle" required>
@@ -18,11 +38,11 @@ description: "Energy that drives the structure to match an input-provided templa
 </ResponseField>
 
 <ResponseField name="backbone_only" type="bool" default="False">
-  Whether to only consider backbone atoms in the template and strucutre. Considers all atoms by default.
+  Whether to only consider backbone atoms in the template and structure. Considers all atoms by default.
 </ResponseField>
 
 <ResponseField name="distogram_separation" type="bool" default="False">
-  Whether strucutre - template separation is measured by taking the root mean square of the difference between the two pairwise distance matrices. By default, the root mean square of the difference in positions is used instead.
+  Whether structure - template separation is measured by taking the root mean square of the difference between the two pairwise distance matrices. By default, the root mean square of the difference in positions is used instead.
 </ResponseField>
 
 <ResponseField name="weight" type="float" default="1.0">
@@ -45,5 +65,37 @@ description: "Energy that drives the structure to match an input-provided templa
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+import biotite.structure.io as strucio
+
+# Load a template structure from a PDB file
+template_atoms = strucio.load_structure("template.pdb")
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# RMSD mode (default): minimize positional deviation from template
+rmsd_energy = bg.energies.TemplateMatchEnergy(
+    oracle=esmfold,
+    template_atoms=template_atoms,
+    residues=residues,
+    backbone_only=True,
+    weight=1.0,
+)
+
+# Distogram mode: minimize pairwise-distance deviation from template
+distogram_energy = bg.energies.TemplateMatchEnergy(
+    oracle=esmfold,
+    template_atoms=template_atoms,
+    residues=residues,
+    distogram_separation=True,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[rmsd_energy],
+    name="my_state",
+)
 ```

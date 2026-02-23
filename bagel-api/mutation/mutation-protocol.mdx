@@ -80,5 +80,12 @@ Replay a mutation record on a system, reusing existing mutation logic.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+class AlwaysSubstitute(bg.mutation.MutationProtocol):
+    def one_step(self, system: bg.System) -> tuple[bg.System, bg.mutation.MutationRecord]:
+        mutated = system.__copy__()
+        chain = self.choose_chain(mutated)
+        mutation = self.mutate_random_residue(chain)
+        return mutated, bg.mutation.MutationRecord(mutations=[mutation])
 ```

@@ -48,5 +48,15 @@ description: "Simulated tempering with cycling temperature schedule."
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+minimizer = bg.minimizer.SimulatedTempering(
+    mutator=bg.mutation.Canonical(n_mutations=1),
+    high_temperature=1.0,
+    low_temperature=0.1,
+    n_steps_high=20,
+    n_steps_low=80,
+    n_cycles=10,
+    callbacks=[bg.callbacks.DefaultLogger(log_interval=10)],
+)
 ```

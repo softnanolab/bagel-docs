@@ -1,24 +1,41 @@
 ---
 title: "Oracle"
-description: "An Oracle is any algorithm that, given a State as input, can return a prediction."
+description: "Oracles provide the predictions that energy terms use to evaluate protein designs"
 ---
 
-## Attributes
+An **oracle** is any algorithm that takes a set of chains as input and returns a prediction — a structure, embeddings, or a scalar property. Energy terms consume these predictions to compute scores during optimization.
 
-<ResponseField name="result_class" type="Type[OracleResult]">
-</ResponseField>
+## Oracle categories
 
-## Methods
+BAGEL defines three categories of oracles:
 
-### predict
+**Folding oracles** predict 3D structures and confidence metrics (pLDDT, pTM, PAE). These power structure-based energy terms like `PTMEnergy`, `PLDDTEnergy`, and `PAEEnergy`.
 
-**Parameters**
+**Embedding oracles** produce per-residue embedding vectors that capture biochemical and evolutionary context. These are used by `EmbeddingsSimilarityEnergy` to maintain functional similarity during design.
 
-<ResponseField name="chains" type="list[Chain]" required>
-</ResponseField>
+**Property oracles** compute scalar values directly from sequences — for example, predicting solubility or counting polar residues. You can build these by subclassing `Oracle` directly.
 
-## Example
+## How BAGEL uses oracles
 
-```python
-{/* TODO: add example */}
-```
+BAGEL wraps [boileroom](/boileroom-api/overview) models, which handle the raw inference (model loading, GPU execution, batching). On top of the raw predictions, BAGEL performs additional processing relevant to protein design:
+
+- **Residue-level pLDDT extraction** — pulling per-residue confidence scores from the predicted structure
+- **PAE submatrix computation** — extracting PAE values for specific residue group pairs, enabling targeted interaction scoring
+- **Multimer linker masking** — excluding artificial linker regions from confidence and structural metrics when predicting multimers
+
+This separation means you work with design-relevant quantities in your energy terms, while boileroom handles the model-level details.
+
+## Built-in oracles
+
+| Oracle | Category | Description |
+|--------|----------|-------------|
+| [ESMFold](/bagel-api/oracles/esmfold) | Folding | Single-sequence structure prediction with pLDDT, pTM, and PAE |
+| [ESM-2](/bagel-api/oracles/esm2) | Embedding | Per-residue embeddings from Meta's protein language model |
+
+## Writing custom oracles
+
+To plug in your own model, subclass `Oracle` (or the more specialized `FoldingOracle` / `EmbeddingOracle`) and implement the prediction method. See the [Custom Oracles guide](/customization/custom-oracles) for a full walkthrough with examples.
+
+## Backend details
+
+Oracle inference is powered by [boileroom](/boileroom-api/overview), which provides a unified Python API for protein prediction models with support for serverless GPU execution via Modal or local execution via Apptainer. See the [boileroom documentation](/boileroom-api/overview) for available models and setup.

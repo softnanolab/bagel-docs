@@ -10,6 +10,10 @@ DOI https://doi.org/10.1038/s42004-025-01601-3
 Note in this reference the explanation of Eq.1 is misleading. Here, the average of the minimum distance
 is over all the the residues in the first group.
 
+## Definition
+
+The FlexEvoBind energy computes the average minimum inter-atomic distance between two residue groups, adapted from the binding loss in Li et al. 2025. For each residue in group 1, the minimum distance to any atom in group 2 is found, and these minimum distances are averaged. When `symmetrized=True` (the default), the same calculation is performed from group 2 to group 1, and a weighted average of both directions is taken. When `plddt_weighted=True`, each direction is divided by its group's average pLDDT, producing a formulation closer to the EvoBind loss.
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -52,5 +56,27 @@ is over all the the residues in the first group.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Define two groups of residues (e.g. hotspot and binder)
+hotspot_residues = [residues_target[i] for i in range(10, 20)]
+binder_residues = residues_binder
+
+# Minimize average minimum distance between two residue groups
+flex_evo_bind = bg.energies.FlexEvoBindEnergy(
+    oracle=esmfold,
+    residues=[hotspot_residues, binder_residues],
+    symmetrized=True,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[binder_chain, target_chain],
+    energy_terms=[flex_evo_bind],
+    name="my_state",
+)
 ```

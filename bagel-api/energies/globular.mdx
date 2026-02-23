@@ -3,6 +3,18 @@ title: "GlobularEnergy"
 description: "Energy proportional to the moment of inertia of the structure around its centroid. This energy is minimized when the atoms belonging to a structure have the lowest possible distance from the centre, and, due to excluded volume effects that prevent collapse to a single point, helps forcing structures to be as close as possible to a spherically distributed cloud of points."
 ---
 
+## Definition
+
+The globular energy is the standard deviation of backbone atom distances from the group centroid, promoting spherical compactness.
+
+$$
+E_{\mathrm{glob}} = \mathrm{std}\left(\| \mathbf{x}_a - \mathbf{c} \|\right)_{a \in G}
+$$
+
+- $\mathbf{x}_a$ are backbone atom positions
+- $\mathbf{c}$ is the centroid of the backbone atoms in the group
+- $\mathrm{std}$ is the standard deviation over all backbone atoms in the group $G$
+
 ## Parameters
 
 <ResponseField name="oracle" type="Oracle" required>
@@ -37,5 +49,22 @@ description: "Energy proportional to the moment of inertia of the structure arou
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Drive the structure toward a compact, spherical shape
+globular = bg.energies.GlobularEnergy(
+    oracle=esmfold,
+    residues=residues,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[globular],
+    name="my_state",
+)
 ```

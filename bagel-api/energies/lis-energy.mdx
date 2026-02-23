@@ -1,7 +1,11 @@
 ---
 title: "LISEnergy"
-description: "Energy representing the Local Interaction Score [], a function of the PAE matrix."
+description: "Energy representing the Local Interaction Score (LIS), a function of the PAE matrix. For each pair of residues with a PAE below a cutoff, the LIS contribution is (cutoff - PAE) / cutoff. The total score is either averaged over all qualifying pairs (intensive) or summed (extensive)."
 ---
+
+## Definition
+
+The Local Interaction Score (LIS) counts the fraction of inter-group residue pairs with PAE below a cutoff threshold, measuring how confidently the model predicts the spatial relationship between residue groups. For each qualifying pair, the contribution is `(cutoff - PAE) / cutoff`, producing a score between 0 and 1. The result is negated so that lower energy corresponds to stronger predicted interactions. When `intensive=True`, the score is averaged over qualifying pairs; when `intensive=False`, it is summed (extensive mode).
 
 ## Parameters
 
@@ -45,5 +49,27 @@ description: "Energy representing the Local Interaction Score [], a function of 
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Define two groups of residues (e.g. hotspot and binder)
+hotspot_residues = [residues_target[i] for i in range(10, 20)]
+binder_residues = residues_binder
+
+# Score local interactions between two groups using PAE-based LIS
+lis_energy = bg.energies.LISEnergy(
+    oracle=esmfold,
+    residues=[hotspot_residues, binder_residues],
+    pae_cutoff=12.0,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[binder_chain, target_chain],
+    energy_terms=[lis_energy],
+    name="my_state",
+)
 ```

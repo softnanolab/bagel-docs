@@ -35,5 +35,9 @@ It does not write structures; use FoldingLogger for structure outputs.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+callbacks = [
+    bg.callbacks.DefaultLogger(log_interval=10),
+]
 ```

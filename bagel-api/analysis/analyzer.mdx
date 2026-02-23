@@ -30,5 +30,8 @@ Plot the evolution of system energy together with individual energy terms.
 ## Example
 
 ```python
-{/* TODO: add example */}
+from bagel.analysis import MonteCarloAnalyzer
+
+analyzer = MonteCarloAnalyzer(path='my_experiment')
+ax = analyzer.plot_energies(weighted=True, use_best=False)
 ```

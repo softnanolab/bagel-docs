@@ -9,6 +9,19 @@ the new residue will be added to the residues for which this term is calculated.
 inherits all energy terms of one of its neighbours (chosen randomly to be the left or right neighbour),
 if these terms are inheritable.
 
+## Definition
+
+The total energy of a state is the weighted sum of all its energy terms:
+
+$$
+E_{S} = \sum_{j}^{N_S} w_{js}\,\epsilon_{js}(\{C\}_S)
+$$
+
+- $E_S$ is the energy of state $S$
+- $w_{js}$ is the weight of energy term $j$ in state $S$
+- $\epsilon_{js}$ is the unweighted energy of term $j$
+- $\{C\}_S$ is the set of chains in state $S$
+
 ## Parameters
 
 <ResponseField name="name" type="str" required>
@@ -127,8 +140,3 @@ Creates atom mask from residue group. Structure used to find unique atoms in sta
 <ResponseField name="residue_group_index" type="int" required>
 </ResponseField>
 
-## Example
-
-```python
-{/* TODO: add example */}
-```

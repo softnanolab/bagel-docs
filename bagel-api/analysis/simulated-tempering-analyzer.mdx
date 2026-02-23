@@ -17,5 +17,8 @@ Plots the cumulative evolution of acceptance rates by temperature.
 ## Example
 
 ```python
-{/* TODO: add example */}
+from bagel.analysis import SimulatedTemperingAnalyzer
+
+analyzer = SimulatedTemperingAnalyzer(path='my_experiment')
+fig, ax = analyzer.plot_acceptance_rate()
 ```

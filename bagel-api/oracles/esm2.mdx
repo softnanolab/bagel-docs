@@ -3,15 +3,26 @@ title: "ESM2"
 description: "Object that uses ESM-2 to predict the embeddings of the residues in the chains."
 ---
 
+`ESM2` is an embedding oracle that wraps Meta's ESM-2 protein language model. It produces high-dimensional per-residue embeddings that capture biochemical and evolutionary context, which are used by embedding-based energy terms like `EmbeddingsSimilarityEnergy`.
+
+By default, BAGEL uses the 650M parameter version of ESM-2, but any ESM-2 model size can be specified via the `config` parameter. For multimers, ESM-2 uses the same linker and positional encoding approach as ESMFold.
+
+<Info>
+ESM-2 inference is powered by [boileroom](/boileroom-api/models/esm2). boileroom handles model loading, GPU execution, and dependency isolation — either serverlessly via Modal or locally via Apptainer. See the [boileroom ESM-2 reference](/boileroom-api/models/esm2) for backend configuration details.
+</Info>
+
 ## Parameters
 
 <ResponseField name="use_modal" type="bool" default="False">
+  Whether to run ESM-2 on Modal's serverless GPU infrastructure. Set to `True` for serverless execution (no local GPU required), or `False` for local GPU execution.
 </ResponseField>
 
 <ResponseField name="config" type="dict[str, Any]" default="{}">
+  Model-specific configuration. Can be used to specify model size, linker parameters, and other options.
 </ResponseField>
 
 <ResponseField name="modal_app_context" type="App | None" default="None">
+  Optional Modal app context for reusing an existing Modal session.
 </ResponseField>
 
 ## Methods
@@ -23,10 +34,31 @@ Calculate the embeddings of the residues in the chains.
 **Parameters**
 
 <ResponseField name="chains" type="list[Chain]" required>
+  The chains to embed. Sequences are concatenated with appropriate linker handling.
 </ResponseField>
 
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create an ESM-2 oracle using Modal
+esm2 = bg.oracles.ESM2(use_modal=True)
+
+# Extract reference embeddings from a conserved region
+reference_embeddings = esm2.predict(chains).embeddings
+
+# Use with EmbeddingsSimilarityEnergy to maintain functional similarity
+state = bg.State(
+    chains=[chain],
+    energy_terms=[
+        bg.energies.EmbeddingsSimilarityEnergy(
+            oracle=esm2,
+            weight=1.0,
+            residues=[conserved_residues],
+            reference_embeddings=reference_embeddings,
+        ),
+    ],
+    name="enzyme_variant",
+)
 ```

@@ -52,5 +52,14 @@ description: "Grand canonical mutation protocol, making a substitution, addition
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+residues = [bg.Residue(name='A', chain_ID='A', index=i, mutable=True) for i in range(6)]
+state = bg.State(name='state_A', chains=[bg.Chain(residues)], energy_terms=[])
+system = bg.System(states=[state])
+
+mutator = bg.mutation.GrandCanonical(
+    move_probabilities={'substitution': 0.5, 'addition': 0.25, 'removal': 0.25}
+)
+mutated_system, mutation_record = mutator.one_step(system)
 ```

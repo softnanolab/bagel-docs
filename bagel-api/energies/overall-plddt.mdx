@@ -1,7 +1,18 @@
 ---
 title: "OverallPLDDTEnergy"
-description: "Overall Predicted Local Distance Difference Test energy."
+description: "Overall Predicted Local Distance Difference Test energy. Unlike PLDDTEnergy, which averages pLDDT over specific residue groups only, OverallPLDDTEnergy averages pLDDT over all residues in the structure. This is useful when you want a measure of global structural confidence rather than per-group confidence."
 ---
+
+## Definition
+
+The overall pLDDT energy is the negated mean pLDDT over all residues in the structure.
+
+$$
+E_{\mathrm{pLDDT}} = -\frac{1}{N} \sum_{\alpha} \mathrm{pLDDT}_\alpha
+$$
+
+- $N$ is the total number of residues in the structure
+- $\mathrm{pLDDT}_\alpha$ is the predicted local distance difference test score for residue $\alpha$
 
 ## Parameters
 
@@ -20,5 +31,21 @@ description: "Overall Predicted Local Distance Difference Test energy."
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Create the energy term
+overall_plddt = bg.energies.OverallPLDDTEnergy(
+    oracle=esmfold,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[overall_plddt],
+    name="my_state",
+)
 ```

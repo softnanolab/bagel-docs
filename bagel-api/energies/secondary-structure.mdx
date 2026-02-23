@@ -3,6 +3,19 @@ title: "SecondaryStructureEnergy"
 description: "Energy that drives the secondary structure of the selected residues to a given type. Calculated by finding the fraction of selected residues with the wrong secondary structure. Secondary structure types include alpha-helix, beta-sheet, and coil."
 ---
 
+## Definition
+
+The secondary structure energy is the fraction of selected residues whose assigned secondary structure does not match the target.
+
+$$
+E_{\mathrm{SS}} = \frac{1}{N_G} \sum_{\alpha \in G} \mathbb{I}[\mathrm{SS}_\alpha \neq \mathrm{SS}_{\mathrm{target}}]
+$$
+
+- $\mathbb{I}$ is the indicator function (1 if the condition is true, 0 otherwise)
+- $\mathrm{SS}_\alpha$ is the secondary structure assignment for residue $\alpha$
+- $\mathrm{SS}_{\mathrm{target}}$ is the target secondary structure (alpha-helix, beta-sheet, or coil)
+- $N_G$ is the number of residues in the group $G$
+
 ## Parameters
 
 <ResponseField name="oracle" type="Oracle" required>
@@ -41,5 +54,30 @@ description: "Energy that drives the secondary structure of the selected residue
 ## Example
 
 ```python
-{/* TODO: add example */}
+import numpy as np
+import bagel as bg
+
+# Create a 190-residue chain
+sequence = np.random.choice(list(bg.constants.aa_dict.keys()), size=190)
+residues = [bg.Residue(name=aa, chain_ID="A", index=i, mutable=True) for i, aa in enumerate(sequence)]
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Define groups of residues that should form beta-sheets
+groups = [residues[(i * 50) + 5 : (i * 50) + 35] for i in range(4)]
+
+secondary_structure = bg.energies.SecondaryStructureEnergy(
+    oracle=esmfold,
+    residues=groups,
+    target_secondary_structure="beta-sheet",
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[bg.Chain(residues)],
+    energy_terms=[secondary_structure],
+    name="my_state",
+)
 ```

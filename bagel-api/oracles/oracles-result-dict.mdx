@@ -29,5 +29,17 @@ description: ""
 ## Example
 
 ```python
-{/* TODO: add example */}
+import pathlib as pl
+import bagel as bg
+from biotite.structure import AtomArray
+
+class DummyFolding(bg.oracles.FoldingOracle):
+    def fold(self, chains: list[bg.Chain]) -> bg.oracles.FoldingResult:
+        return bg.oracles.FoldingResult(input_chains=chains, structure=AtomArray(0))
+
+chain = bg.Chain([bg.Residue(name='A', chain_ID='A', index=0)])
+oracle = DummyFolding()
+results = bg.oracles.OraclesResultDict()
+results[oracle] = oracle.predict(chains=[chain])
+structure = results.get_structure(oracle)
 ```

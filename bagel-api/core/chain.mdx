@@ -30,7 +30,8 @@ String representation of amino acid in 3-letters format.
 ## Example
 
 ```python
-residue = Residue("A", "X", 0)
-residue.three_letter_name
-    'ALA'
+import bagel as bg
+
+residue = bg.Residue(name='A', chain_ID='X', index=0)
+three_letter = residue.three_letter_name  # 'ALA'
 ```

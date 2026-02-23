@@ -32,5 +32,9 @@ Write the structure to a CIF file.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+from biotite.structure import AtomArray
+
+chain = bg.Chain([bg.Residue(name='A', chain_ID='A', index=0)])
+result = bg.oracles.FoldingResult(input_chains=[chain], structure=AtomArray(0))
 ```

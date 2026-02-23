@@ -56,5 +56,17 @@ description: "Stores statistics from the ESMFold folding algorithm."
 ## Example
 
 ```python
-{/* TODO: add example */}
+import numpy as np
+import bagel as bg
+from biotite.structure import AtomArray
+
+chain = bg.Chain([bg.Residue(name='A', chain_ID='A', index=0)])
+structure = AtomArray(0)
+result = bg.oracles.ESMFoldResult(
+    input_chains=[chain],
+    structure=structure,
+    local_plddt=np.array([[0.9]], dtype=float),
+    ptm=np.array([0.8], dtype=float),
+    pae=np.array([[0.0]], dtype=float),
+)
 ```

@@ -3,6 +3,19 @@ title: "HydrophobicEnergy"
 description: "Energy Proportional to the amount of hydrophobic residues present. This is measured by the fraction of selected atoms that belong to hydrophobic residues (valine, isoleucine, leucine, phenylalanine, methionine, tryptophan)."
 ---
 
+## Definition
+
+The hydrophobic energy is the fraction of atoms belonging to hydrophobic residues within the selected group.
+
+$$
+E_{\mathrm{hydrophobic}} = \frac{N_{\mathrm{hydrophobic}}}{N_{G}}
+$$
+
+- $N_{\mathrm{hydrophobic}}$ is the count of atoms belonging to hydrophobic residues (V, I, L, F, M, W) in the group
+- $N_G$ is the total atom count in the group
+
+When `mode` is set to `'surface'` or `'core'`, this fraction is additionally weighted by the mean normalized SASA of the hydrophobic atoms.
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -49,5 +62,22 @@ description: "Energy Proportional to the amount of hydrophobic residues present.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Penalize surface hydrophobic residues (default mode='all' counts everywhere)
+hydrophobic = bg.energies.HydrophobicEnergy(
+    oracle=esmfold,
+    weight=5.0,
+    mode="surface",
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[hydrophobic],
+    name="my_state",
+)
 ```

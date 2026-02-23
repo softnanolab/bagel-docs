@@ -3,6 +3,19 @@ title: "PAEEnergy"
 description: "Energy that drives down the uncertainty in the predicted distances between two groups of residues. This uncertainty is measured by calculating the average normalised predicted alignment error of all the relevant residue pairs."
 ---
 
+## Definition
+
+The PAE energy is the mean predicted alignment error between two residue groups, normalized by a maximum PAE value.
+
+$$
+E_{\mathrm{PAE}} = \frac{1}{N_{\mathrm{pairs}}} \sum_{\alpha \in G_1, \beta \in G_2} \frac{\mathrm{PAE}_{\alpha\beta}}{\mathrm{PAE}_{\max}}
+$$
+
+- $\mathrm{PAE}_{\alpha\beta}$ is the predicted alignment error between residues $\alpha$ and $\beta$
+- $\mathrm{PAE}_{\max}$ is 30 Angstrom (the approximate maximum PAE value)
+- $G_1$ and $G_2$ are the two residue groups
+- $N_{\mathrm{pairs}}$ is the number of residue pairs considered
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -41,5 +54,26 @@ description: "Energy that drives down the uncertainty in the predicted distances
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Define two groups of residues (e.g. hotspot and binder)
+hotspot_residues = [residues_target[i] for i in range(10, 20)]
+binder_residues = residues_binder
+
+# Minimize PAE between the two groups to drive confident binding
+pae_energy = bg.energies.PAEEnergy(
+    oracle=esmfold,
+    residues=[hotspot_residues, binder_residues],
+    weight=5.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[binder_chain, target_chain],
+    energy_terms=[pae_energy],
+    name="my_state",
+)
 ```

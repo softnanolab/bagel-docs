@@ -29,5 +29,13 @@ but we keep track of the chain_id.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+mutation = bg.mutation.Mutation(
+    chain_id='A',
+    move_type='substitution',
+    residue_index=4,
+    old_amino_acid='G',
+    new_amino_acid='L',
+)
 ```

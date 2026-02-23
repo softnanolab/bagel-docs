@@ -20,5 +20,12 @@ description: "Results from an Oracle."
 ## Example
 
 ```python
-{/* TODO: add example */}
+import pathlib as pl
+import bagel as bg
+
+class DummyResult(bg.oracles.OracleResult):
+    input_chains: list[bg.Chain]
+
+    def save_attributes(self, filepath: pl.Path) -> None:
+        filepath.with_suffix('.txt').write_text('ok')
 ```

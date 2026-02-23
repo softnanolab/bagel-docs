@@ -27,5 +27,17 @@ description: "An EmbeddingOracle is a specific type of Oracle that uses a sequen
 ## Example
 
 ```python
-{/* TODO: add example */}
+import numpy as np
+import bagel as bg
+
+class DummyEmbeddingOracle(bg.oracles.EmbeddingOracle):
+    def _pre_process(self, chains: list[bg.Chain]):
+        return chains
+
+    def _post_process(self, output):
+        return output
+
+    def embed(self, chains: list[bg.Chain]) -> bg.oracles.EmbeddingResult:
+        embeddings = np.zeros((sum(chain.length for chain in chains), 8), dtype=float)
+        return bg.oracles.EmbeddingResult(input_chains=chains, embeddings=embeddings)
 ```

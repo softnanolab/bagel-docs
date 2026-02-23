@@ -3,6 +3,16 @@ title: "PTMEnergy"
 description: "Predicted Template Modelling score energy. This is a measure of how confident the folding model is in its overall structure prediction."
 ---
 
+## Definition
+
+The pTM energy is the negated predicted Template Modelling score, so that minimizing energy corresponds to maximizing structural confidence.
+
+$$
+E_{\mathrm{pTM}} = -\mathrm{pTM}
+$$
+
+- $\mathrm{pTM}$ is the predicted Template Modelling score returned by the folding oracle (range 0 to 1)
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -29,5 +39,21 @@ description: "Predicted Template Modelling score energy. This is a measure of ho
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Create the energy term
+ptm_energy = bg.energies.PTMEnergy(
+    oracle=esmfold,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[ptm_energy],
+    name="my_state",
+)
 ```

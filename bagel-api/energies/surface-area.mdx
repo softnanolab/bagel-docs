@@ -3,6 +3,18 @@ title: "SurfaceAreaEnergy"
 description: "Energy term proportional to the amount of exposed surface area. This is measured by dividing the mean SASA (Solvent Accessible Surface Area) of the relevant atoms by the maximum possible SASA."
 ---
 
+## Definition
+
+The SASA energy is the mean solvent-accessible surface area of atoms in the group, normalized by a maximum SASA value.
+
+$$
+E_{\mathrm{SASA}} = \frac{1}{N_{\mathrm{atoms},G}} \sum_{a \in G} \frac{\mathrm{SASA}_a}{\mathrm{SASA}_{\max}}
+$$
+
+- $\mathrm{SASA}_a$ is the solvent-accessible surface area of atom $a$
+- $\mathrm{SASA}_{\max}$ is a normalization constant (by default, the full surface area of a sulfur atom)
+- $N_{\mathrm{atoms},G}$ is the number of atoms in the group $G$
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -44,5 +56,22 @@ description: "Energy term proportional to the amount of exposed surface area. Th
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Minimize exposed surface area for a specific group of residues
+surface_energy = bg.energies.SurfaceAreaEnergy(
+    oracle=esmfold,
+    residues=residues,
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[chain],
+    energy_terms=[surface_energy],
+    name="my_state",
+)
 ```

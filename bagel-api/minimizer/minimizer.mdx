@@ -96,5 +96,17 @@ Implement a protocol to fully minimize the loss function defined for the system.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import pathlib as pl
+import bagel as bg
+
+class IdentityMinimizer(bg.minimizer.Minimizer):
+    def minimize_system(self, system: bg.System) -> bg.System:
+        return system
+
+minimizer = IdentityMinimizer(
+    mutator=bg.mutation.Canonical(),
+    experiment_name='identity',
+    log_frequency=10,
+    log_path=pl.Path('logs'),
+)
 ```

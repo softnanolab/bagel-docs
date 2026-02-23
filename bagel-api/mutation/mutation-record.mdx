@@ -11,5 +11,17 @@ description: "Record of all mutations performed in a single one_step() call."
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+record = bg.mutation.MutationRecord(
+    mutations=[
+        bg.mutation.Mutation(
+            chain_id='A',
+            move_type='substitution',
+            residue_index=2,
+            old_amino_acid='A',
+            new_amino_acid='V',
+        )
+    ]
+)
 ```

@@ -36,5 +36,10 @@ description: "Container for all information passed to callbacks during optimizat
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+class PrintBestEnergy(bg.callbacks.Callback):
+    def on_step_end(self, context: bg.callbacks.CallbackContext) -> None:
+        best = context.metrics.get('best_system_energy')
+        print(f'step={context.step} best={best}')
 ```

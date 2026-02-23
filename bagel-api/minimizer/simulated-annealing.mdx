@@ -42,5 +42,13 @@ description: "Simulated annealing with linearly decreasing temperature schedule.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+minimizer = bg.minimizer.SimulatedAnnealing(
+    mutator=bg.mutation.Canonical(n_mutations=1),
+    initial_temperature=0.2,
+    final_temperature=0.05,
+    n_steps=200,
+    callbacks=[bg.callbacks.DefaultLogger(log_interval=10)],
+)
 ```

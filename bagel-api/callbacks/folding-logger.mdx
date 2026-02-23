@@ -32,5 +32,10 @@ description: "Logger that saves CIF structures and oracle attributes for a speci
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+esmfold = bg.oracles.ESMFold(use_modal=True)
+callbacks = [
+    bg.callbacks.FoldingLogger(folding_oracle=esmfold, log_interval=50),
+]
 ```

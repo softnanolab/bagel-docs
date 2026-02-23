@@ -3,6 +3,18 @@ title: "PLDDTEnergy"
 description: "Predicted Local Distance Difference Test energy. This is the spread of the predicted separation between an atom and each of its nearest neighbours. This translates to how confident the model is that the sequence has a single lowest energy structure, as opposed to a disordered, constantly changing structure. This energy is averaged over the relevant atoms."
 ---
 
+## Definition
+
+The pLDDT energy is the negated mean pLDDT over the specified residue groups.
+
+$$
+E_{\mathrm{pLDDT}} = -\frac{1}{N_G} \sum_{\alpha \in G} \mathrm{pLDDT}_\alpha
+$$
+
+- $G$ is the set of residues in the specified groups
+- $N_G$ is the number of residues in $G$
+- $\mathrm{pLDDT}_\alpha$ is the predicted local distance difference test score for residue $\alpha$
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -37,5 +49,22 @@ description: "Predicted Local Distance Difference Test energy. This is the sprea
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Maximize pLDDT confidence for a specific group of residues (e.g. a binder)
+plddt_energy = bg.energies.PLDDTEnergy(
+    oracle=esmfold,
+    residues=residues_binder,
+    weight=5.0,
+)
+
+# Add to a state alongside other energy terms
+state = bg.State(
+    chains=[binder_chain, target_chain],
+    energy_terms=[plddt_energy],
+    name="my_state",
+)
 ```

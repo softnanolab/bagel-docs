@@ -3,6 +3,17 @@ title: "SeparationEnergy"
 description: "Energy that minimizes the distance between two groups of residues. The position of each group is defined as the centroid of the backbone atoms of the residues belonging of that group."
 ---
 
+## Definition
+
+The separation energy is the Euclidean distance between the backbone centroids of two residue groups.
+
+$$
+E_{\mathrm{sep}} = \| \mathbf{c}_1 - \mathbf{c}_2 \|
+$$
+
+- $\mathbf{c}_1$ and $\mathbf{c}_2$ are the centroids of the backbone atoms in residue groups 1 and 2
+- If a custom `function` $f$ is provided, the energy becomes $E_{\mathrm{sep}} = f(\| \mathbf{c}_1 - \mathbf{c}_2 \|)$
+
 ## Parameters
 
 <ResponseField name="oracle" type="FoldingOracle" required>
@@ -41,5 +52,26 @@ description: "Energy that minimizes the distance between two groups of residues.
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+# Create the folding oracle
+esmfold = bg.oracles.ESMFold()
+
+# Define two groups of residues (e.g. hotspot and binder)
+hotspot_residues = [residues_target[i] for i in range(10, 20)]
+binder_residues = residues_binder
+
+# Minimize the distance between the centroids of the two groups
+separation = bg.energies.SeparationEnergy(
+    oracle=esmfold,
+    residues=[hotspot_residues, binder_residues],
+    weight=1.0,
+)
+
+# Add to a state
+state = bg.State(
+    chains=[binder_chain, target_chain],
+    energy_terms=[separation],
+    name="my_state",
+)
 ```

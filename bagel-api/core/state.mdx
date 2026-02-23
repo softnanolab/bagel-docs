@@ -72,5 +72,9 @@ You look within the same chain and the same state and you add the residue to the
 ## Example
 
 ```python
-{/* TODO: add example */}
+import bagel as bg
+
+residues = [bg.Residue(name='A', chain_ID='A', index=i, mutable=True) for i in range(5)]
+chain = bg.Chain(residues)
+state = bg.State(name='state_A', chains=[chain], energy_terms=[])
 ```
