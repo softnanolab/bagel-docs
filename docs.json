@@ -36,9 +36,7 @@
             "pages": [
               "case-studies/simple-peptide-binder",
               "case-studies/targeting-intrinsically-disordered-regions",
-              "case-studies/enzyme-variants",
-              "case-studies/papers/bagel-plos",
-              "case-studies/papers/targeting-idr"
+              "case-studies/enzyme-variants"
             ]
           },
           {
