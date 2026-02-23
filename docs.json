@@ -3,14 +3,14 @@
   "theme": "linden",
   "name": "BAGEL",
   "colors": {
-    "primary": "#5078D0",
-    "light": "#5078D0",
-    "dark": "#5078D0"
+    "primary": "#B5342A",
+    "light": "#B5342A",
+    "dark": "#E8534A"
   },
   "background": {
     "color": {
-      "light": "#f5f4e9",
-      "dark": "#0f0f0f"
+      "light": "#f7f6f0",
+      "dark": "#111827"
     }
   },
   "favicon": "/favicon.png",

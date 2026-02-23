@@ -14,6 +14,15 @@ html {
   font-size: var(--bagel-font-size-base);
 }
 
+/* Improve text contrast against cream/navy backgrounds */
+body {
+  color: #1a1a1a;
+}
+
+.dark body {
+  color: #e2e4e9;
+}
+
 /* Keep KaTeX display math from clipping */
 .katex-display,
 .katex-display > .katex {
@@ -36,12 +45,12 @@ html {
   overflow-x: hidden;
 }
 
-/* Sidebar and TOC scrollbar styling */
+/* Sidebar and TOC scrollbar styling — crimson light, blue dark */
 #sidebar-content,
 #table-of-contents,
 #table-of-contents-content {
   scrollbar-width: thin;
-  scrollbar-color: rgb(var(--gray-500) / 0.45) transparent;
+  scrollbar-color: rgba(181, 52, 42, 0.3) transparent;
 }
 
 #sidebar-content::-webkit-scrollbar,
@@ -54,7 +63,7 @@ html {
 #sidebar-content::-webkit-scrollbar-thumb,
 #table-of-contents::-webkit-scrollbar-thumb,
 #table-of-contents-content::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--gray-500) / 0.38);
+  background-color: rgba(181, 52, 42, 0.3);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -63,19 +72,31 @@ html {
 #sidebar-content:hover::-webkit-scrollbar-thumb,
 #table-of-contents:hover::-webkit-scrollbar-thumb,
 #table-of-contents-content:hover::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--gray-500) / 0.55);
+  background-color: rgba(181, 52, 42, 0.5);
+}
+
+.dark #sidebar-content,
+.dark #table-of-contents,
+.dark #table-of-contents-content {
+  scrollbar-color: rgba(99, 130, 190, 0.35) transparent;
 }
 
 .dark #sidebar-content::-webkit-scrollbar-thumb,
 .dark #table-of-contents::-webkit-scrollbar-thumb,
 .dark #table-of-contents-content::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--gray-400) / 0.4);
+  background-color: rgba(99, 130, 190, 0.35);
 }
 
 .dark #sidebar-content:hover::-webkit-scrollbar-thumb,
 .dark #table-of-contents:hover::-webkit-scrollbar-thumb,
 .dark #table-of-contents-content:hover::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--gray-300) / 0.5);
+  background-color: rgba(99, 130, 190, 0.55);
+}
+
+/* Shrink the "Copy page" button */
+#page-context-menu {
+  transform: scale(0.9);
+  transform-origin: top right;
 }
 
 /* Fix pagination buttons from being all-caps */
