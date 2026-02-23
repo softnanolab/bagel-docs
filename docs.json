@@ -28,14 +28,8 @@
             ]
           },
           {
-            "group": "Customization",
-            "pages": [
-              "customization/custom-energy-terms",
-              "customization/custom-mutation-protocols",
-              "customization/custom-minimizers",
-              "customization/custom-oracles",
-              "customization/custom-callbacks"
-            ]
+            "group": "Tutorials",
+            "pages": []
           },
           {
             "group": "Case Studies",
@@ -45,6 +39,16 @@
               "case-studies/enzyme-variants",
               "case-studies/papers/bagel-plos",
               "case-studies/papers/targeting-idr"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "customization/custom-energy-terms",
+              "customization/custom-mutation-protocols",
+              "customization/custom-minimizers",
+              "customization/custom-oracles",
+              "customization/custom-callbacks"
             ]
           }
         ]
