@@ -31,17 +31,7 @@ Modal provides serverless GPU execution. Your code runs locally, but the model i
 
 ### GPU options
 
-Modal automatically selects a GPU based on the model's requirements. The following GPU types are available on Modal:
-
-| GPU | VRAM |
-|---|---|
-| T4 | 16 GB |
-| L4 | 24 GB |
-| A10G | 24 GB |
-| A100-40GB | 40 GB |
-| A100-80GB | 80 GB |
-| L40S | 48 GB |
-| H100 | 80 GB |
+You can select a GPU type via the `device` parameter. See [Modal's pricing page](https://modal.com/pricing) for the full list of available GPUs, VRAM, and per-second pricing.
 
 ### Serverless scaling
 
