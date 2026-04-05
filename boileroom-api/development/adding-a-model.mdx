@@ -429,18 +429,3 @@ supported_cuda:
 ```
 
 The build script at `scripts/images/build_model_images.py` reads these files and pushes images to `docker.io/jakublala/boileroom-{name}:{tag}`.
-
-## Checklist
-
-Before submitting your PR, verify:
-
-- [ ] `types.py` -- Output dataclass follows `StructurePrediction` or `EmbeddingPrediction` protocol
-- [ ] `core.py` -- Implements `_load()`, `_initialize()`, `fold()`/`embed()`, and `_convert_outputs()`
-- [ ] `core.py` -- Defines `DEFAULT_CONFIG` and `STATIC_CONFIG_KEYS`
-- [ ] `image.py` -- Modal image extends `base_image` with model-specific dependencies
-- [ ] `{name}.py` -- Modal wrapper uses lazy imports in `@modal.enter()`
-- [ ] `{name}.py` -- High-level wrapper supports both `modal` and `apptainer` backends
-- [ ] `__init__.py` -- Lazy exports at model, models, and top-level package
-- [ ] Tests pass against the Modal backend
-- [ ] Dockerfile and environment.yml build successfully
-- [ ] `config.yaml` lists supported CUDA versions

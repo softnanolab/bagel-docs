@@ -105,13 +105,3 @@ uv run pytest --backend your_backend -v
 ```
 
 Make sure the core model tests pass with your backend before opening a PR.
-
-## Checklist
-
-Before you submit your backend, verify the following:
-
-- [ ] Subclass `Backend` and implement both `startup()` and `shutdown()`
-- [ ] Backend's `model` attribute exposes the prediction methods that `ModelWrapper._call_backend_method()` expects
-- [ ] Import your backend lazily in each model wrapper's `__init__`
-- [ ] Add your backend to the `choices` tuple in the `--backend` option in `tests/conftest.py`
-- [ ] All existing tests pass when run with your backend

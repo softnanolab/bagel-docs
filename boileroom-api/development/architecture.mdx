@@ -8,22 +8,22 @@ description: "Understand the three-layer architecture that powers boileroom's ba
 Boileroom is built around a three-layer architecture that separates pure model logic from execution backends and user-facing APIs. This design lets you run the same protein models locally, on Modal's serverless GPUs, or inside Apptainer containers without changing your application code.
 
 ```
-┌─────────────────────────────────────────────────────┐
-│            Layer 3: High-Level Wrappers              │
-│  ESMFold  |  ESM2  |  Chai1  |  Boltz2              │
-│  (ModelWrapper subclasses, context managers)          │
-│  backend="modal" | backend="apptainer"               │
-├─────────────────────────────────────────────────────┤
-│            Layer 2: Backend Layer                     │
-│  ModalBackend            |   ApptainerBackend         │
-│  ModalAppManager         |   HTTP microservice        │
-│  @app.cls() remote GPU   |   Docker/Apptainer image   │
-├─────────────────────────────────────────────────────┤
-│            Layer 1: Core Algorithms                   │
-│  ESMFoldCore | ESM2Core | Chai1Core | Boltz2Core      │
-│  (Algorithm subclasses, pure Python, no backend deps) │
-│  _load() | update_config() | _resolve_device()        │
-└─────────────────────────────────────────────────────┘
+Layer 3: High-Level Wrappers
+  ESMFold / ESM2 / Chai1 / Boltz2
+  ModelWrapper subclasses, context managers
+  backend="modal" or backend="apptainer"
+          |
+          v
+Layer 2: Backend Layer
+  ModalBackend              ApptainerBackend
+  ModalAppManager           HTTP microservice
+  @app.cls() remote GPU     Docker/Apptainer image
+          |
+          v
+Layer 1: Core Algorithms
+  ESMFoldCore / ESM2Core / Chai1Core / Boltz2Core
+  Algorithm subclasses, pure Python, no backend deps
+  _load() / _resolve_device() / _merge_options()
 ```
 
 ## Layer 1: Core Algorithms
