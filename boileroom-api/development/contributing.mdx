@@ -1,0 +1,112 @@
+---
+title: "Contributing"
+description: "Complete contributor guide for boileroom, covering setup, testing, code quality, and the PR process."
+---
+
+## Prerequisites
+
+Before you start, make sure you have the following installed:
+
+- **Python 3.12**
+- **uv** package manager
+- **Git**
+- **Modal account** (for running integration tests remotely) or **Apptainer** (for local testing)
+
+## Setup
+
+Clone the repository and set up your environment:
+
+```bash
+git clone https://github.com/softnanolab/boileroom.git
+cd boileroom
+uv python install 3.12
+uv python pin 3.12
+uv sync
+```
+
+This installs all dependencies into a virtual environment managed by uv.
+
+## Running tests
+
+Tests use **pytest** with **pytest-xdist** for parallel execution.
+
+Run the full test suite:
+
+```bash
+uv run pytest -n auto
+```
+
+<Note>
+Running the full suite requires Modal credentials. Set the `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET` environment variables before running.
+</Note>
+
+Run tests for a specific model:
+
+```bash
+uv run pytest tests/esm/ -v
+```
+
+Specify a GPU type:
+
+```bash
+uv run pytest --gpu A100-40GB
+```
+
+## Code quality
+
+Boileroom uses **pre-commit** hooks that run automatically when you commit. You can also run them manually:
+
+```bash
+pre-commit run --all-files
+```
+
+The toolchain includes:
+
+- **ruff** for linting and formatting (line length: 120 characters)
+- **mypy** for type checking
+
+All checks must pass before your PR can be merged.
+
+## PR process
+
+1. Create a branch from `main` (or the current development branch if one exists).
+2. Make focused changes. Prefer small, reviewable PRs over large ones.
+3. Ensure all CI checks pass (lint, format, tests).
+4. Bump the version in `pyproject.toml`. This is required by CI and your pipeline will fail without it.
+5. Write a PR description that explains **what** you changed and **why**.
+
+## Project structure
+
+```
+boileroom/
+    __init__.py          # Public exports
+    base.py              # Algorithm, ModelWrapper base classes
+    utils.py             # Shared utilities
+    backend/
+        base.py          # Backend ABC
+        modal.py         # Modal backend
+        apptainer.py     # Apptainer backend
+    models/
+        esm/             # ESMFold + ESM2
+        chai/            # Chai-1
+        boltz/           # Boltz-2
+    images/              # Modal image definitions
+tests/
+    conftest.py          # Shared fixtures
+    esm/, chai/, boltz/  # Per-model test suites
+    data/                # Reference outputs
+```
+
+## Key conventions
+
+- **Core algorithms are backend-agnostic.** They must not import Modal, Apptainer, or any other backend-specific library.
+- **Modal imports** go at the top of wrapper files (they are needed at import time for decorators).
+- **Apptainer imports** are lazy (inside `elif` branches) to avoid requiring Apptainer as a dependency.
+- **Output types** are dataclasses defined in `types.py`.
+- **Test reference data** goes in `tests/data/{model}/`.
+
+## Further reading
+
+- [Architecture](/boileroom-api/development/architecture) -- how the system is structured and why.
+- [Adding a Model](/boileroom-api/development/adding-a-model) -- step-by-step guide for integrating a new model.
+- [Adding a Backend](/boileroom-api/development/adding-a-backend) -- how to implement a new execution backend.

@@ -1,0 +1,446 @@
+---
+title: "Adding a New Model"
+description: "Step-by-step guide for integrating a new protein prediction model into the boileroom framework."
+---
+
+## Overview
+
+This guide walks you through adding a new model to boileroom. You will create a set of files that follow the same three-layer architecture used by every existing model (ESMFold, ESM-2, Chai-1, Boltz-2): a core algorithm, a typed output, a Modal image, a Modal wrapper, and a high-level user-facing class.
+
+By the end, your model will work with every backend (Modal, Apptainer) and be accessible through the same interface as the built-in models.
+
+## File structure
+
+Create a new directory under `boileroom/models/{name}/` with the following files:
+
+```
+boileroom/models/{name}/
+    __init__.py        # Lazy export of the high-level class
+    core.py            # {Name}Core algorithm class
+    {name}.py          # Modal wrapper + high-level wrapper
+    types.py           # Output dataclass
+    image.py           # Modal image definition
+```
+
+## Step 1: Define the output type
+
+Create `types.py` with a dataclass that structurally conforms to the appropriate protocol. For structure prediction models, follow `StructurePrediction`; for embedding models, follow `EmbeddingPrediction`. These are `Protocol` classes — your dataclass should satisfy them structurally rather than inheriting from them.
+
+**Structure prediction output:**
+
+```python
+# boileroom/models/{name}/types.py
+
+from dataclasses import dataclass
+from typing import Optional, List, Any
+
+import numpy as np
+
+from ...base import PredictionMetadata
+
+
+@dataclass
+class MyModelOutput:
+    """Output from MyModel prediction.
+
+    Structurally conforms to the StructurePrediction protocol.
+    """
+
+    # Required by StructurePrediction protocol
+    metadata: PredictionMetadata
+    atom_array: Optional[List[Any]] = None  # One AtomArray per sample
+
+    # Model-specific confidence outputs
+    plddt: Optional[List[np.ndarray]] = None
+    pae: Optional[List[np.ndarray]] = None
+
+    # Optional serialized structures
+    pdb: Optional[List[str]] = None
+    cif: Optional[List[str]] = None
+```
+
+**Embedding output:**
+
+```python
+from ...base import PredictionMetadata
+
+@dataclass
+class MyModelOutput:
+    """Output from MyModel embeddings."""
+
+    embeddings: np.ndarray        # (batch_size, seq_len, embedding_dim)
+    metadata: PredictionMetadata
+    chain_index: np.ndarray       # (batch_size, seq_len)
+    residue_index: np.ndarray     # (batch_size, seq_len)
+    hidden_states: Optional[np.ndarray] = None
+```
+
+The `metadata` field must always be a `PredictionMetadata` instance. Keep additional fields optional and default to `None` so that `_filter_include_fields()` can zero them out when users request a subset.
+
+## Step 2: Create the core algorithm
+
+Create `core.py` with a class that inherits from `FoldingAlgorithm` (structure prediction) or `EmbeddingAlgorithm` (embeddings). Both live in `boileroom.base`.
+
+```python
+# boileroom/models/{name}/core.py
+
+import logging
+from typing import Optional, Union, Sequence
+
+import torch
+
+from ...base import FoldingAlgorithm
+from ...utils import Timer, MODAL_MODEL_DIR
+from .types import MyModelOutput
+
+logger = logging.getLogger(__name__)
+
+
+class MyModelCore(FoldingAlgorithm):
+    """Core algorithm for MyModel structure prediction."""
+
+    DEFAULT_CONFIG = {
+        "device": "cuda:0",
+        "include_fields": None,  # Optional[List[str]]
+        # Add model-specific defaults here
+    }
+
+    # Keys that cannot be overridden per-call via options
+    STATIC_CONFIG_KEYS = {"device"}
+
+    def __init__(self, config: dict | None = None) -> None:
+        super().__init__(config or {})
+        self.name = "MyModel"
+        self.version = "1.0.0"
+        self.metadata = self._initialize_metadata(
+            model_name=self.name,
+            model_version=self.version,
+        )
+        self.model = None
+        self.tokenizer = None
+
+    def _initialize(self) -> None:
+        """Entry point called by the Modal wrapper after construction."""
+        self._load()
+
+    def _load(self) -> None:
+        """Load model weights and move to the resolved device."""
+        device = self._resolve_device()
+
+        # Load your model here
+        # self.model = MyModelLib.from_pretrained(...)
+        # self.model = self.model.to(device)
+        # self.model.eval()
+
+        self.ready = True
+
+    def fold(
+        self,
+        sequences: Union[str, Sequence[str]],
+        options: Optional[dict] = None,
+    ) -> MyModelOutput:
+        """Run structure prediction."""
+        sequences = self._validate_sequences(sequences)
+        config = self._merge_options(options)
+
+        with Timer("Preprocessing") as preprocess_timer:
+            # Tokenize, prepare inputs
+            pass
+
+        with Timer("Inference") as inference_timer:
+            # Run model inference
+            pass
+
+        with Timer("Postprocessing") as postprocess_timer:
+            output = self._convert_outputs(
+                raw_output=...,
+                sequences=sequences,
+                config=config,
+            )
+
+        output.metadata.sequence_lengths = self._compute_sequence_lengths(sequences)
+        output.metadata.preprocessing_time = preprocess_timer.duration
+        output.metadata.inference_time = inference_timer.duration
+        output.metadata.postprocessing_time = postprocess_timer.duration
+
+        return self._filter_include_fields(output, config.get("include_fields"))
+
+    def _convert_outputs(self, raw_output, sequences, config) -> MyModelOutput:
+        """Convert raw model output into the typed dataclass."""
+        metadata = self._initialize_metadata(self.name, self.version)
+        return MyModelOutput(
+            metadata=metadata,
+            atom_array=...,  # Convert to list of Biotite AtomArray
+        )
+```
+
+Key points:
+
+- `_resolve_device()` returns a `torch.device` based on the config or CUDA availability.
+- `_merge_options(options)` merges per-call overrides into the config but raises `ValueError` if the caller tries to override a key in `STATIC_CONFIG_KEYS`.
+- `_validate_sequences()` normalizes input to a list and checks for invalid amino acids.
+- `_filter_include_fields()` lets users request only specific output fields, reducing data transfer.
+
+## Step 3: Create the Modal image
+
+Create `image.py` that extends the shared base image with your model's dependencies.
+
+```python
+# boileroom/models/{name}/image.py
+
+from ...images.base import base_image
+
+mymodel_image = base_image.pip_install(
+    "torch>=2.5.1",
+    "my-model-lib>=1.0.0",
+)
+```
+
+The base image is a Debian slim container with Python 3.12, `wget`, `git`, and `biotite` pre-installed. Chain additional `.pip_install()`, `.apt_install()`, or `.env()` calls as needed.
+
+If your model needs environment variables (e.g., memory allocation settings), add them:
+
+```python
+mymodel_image = base_image.pip_install(...).env(
+    {"PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}
+)
+```
+
+## Step 4: Create the Modal wrapper
+
+In `{name}.py`, define a Modal class that wraps your core algorithm for serverless GPU execution.
+
+```python
+# boileroom/models/{name}/{name}.py
+
+import json
+import logging
+from typing import Optional, Sequence, Union
+
+import modal
+
+from ...backend.modal import app
+from .image import mymodel_image
+from ...images.volumes import model_weights
+from ...utils import MINUTES, MODAL_MODEL_DIR
+from .types import MyModelOutput
+
+logger = logging.getLogger(__name__)
+
+
+@app.cls(
+    image=mymodel_image,
+    gpu="T4",
+    timeout=20 * MINUTES,
+    scaledown_window=10 * MINUTES,
+    volumes={MODAL_MODEL_DIR: model_weights},
+)
+class ModalMyModel:
+    config: bytes = modal.parameter(default=b"{}")
+
+    @modal.enter()
+    def _initialize(self) -> None:
+        from .core import MyModelCore  # Lazy import inside container
+
+        self._core = MyModelCore(json.loads(self.config.decode("utf-8")))
+        self._core._initialize()
+
+    @modal.method()
+    def fold(
+        self,
+        sequences: Union[str, Sequence[str]],
+        options: Optional[dict] = None,
+    ) -> MyModelOutput:
+        return self._core.fold(sequences, options=options)
+```
+
+The core is imported lazily inside `@modal.enter()` so that heavy dependencies (PyTorch, model libraries) are only loaded inside the container, not on your local machine.
+
+The `config` parameter is declared as `bytes` and deserialized from JSON because Modal serializes parameters -- this is the established pattern across all models.
+
+## Step 5: Create the high-level wrapper
+
+In the same `{name}.py` file, add the user-facing class that delegates to a backend.
+
+```python
+from ...backend import ModalBackend
+from ...backend.base import Backend
+from ...base import ModelWrapper
+
+
+class MyModel(ModelWrapper):
+    """Interface for MyModel protein structure prediction."""
+
+    def __init__(
+        self,
+        backend: str = "modal",
+        device: Optional[str] = None,
+        config: Optional[dict] = None,
+    ) -> None:
+        if config is None:
+            config = {}
+        self.config = config
+        self.device = device
+        backend_type, backend_tag = ModelWrapper.parse_backend(backend)
+
+        backend_instance: Backend
+        if backend_type == "modal":
+            backend_instance = ModalBackend(ModalMyModel, config, device=device)
+        elif backend_type == "apptainer":
+            from ...backend.apptainer import ApptainerBackend
+
+            core_class_path = "boileroom.models.{name}.core.MyModelCore"
+            image_uri = f"docker://docker.io/jakublala/boileroom-{{name}}:{backend_tag}"
+            backend_instance = ApptainerBackend(
+                core_class_path, image_uri, config or {}, device=device,
+            )
+        else:
+            raise ValueError(f"Backend {backend_type} not supported")
+
+        self._backend = backend_instance
+        self._backend.start()
+
+    def fold(
+        self,
+        sequences: Union[str, Sequence[str]],
+        options: Optional[dict] = None,
+    ) -> MyModelOutput:
+        """Predict protein structure for one or more sequences."""
+        return self._call_backend_method("fold", sequences, options=options)
+```
+
+`_call_backend_method` handles the dispatch: for Modal it calls `.remote()`, for Apptainer it calls the method through an HTTP microservice. You do not need to handle this yourself.
+
+## Step 6: Register the model
+
+**Export from the model package** -- create `__init__.py` with lazy imports:
+
+```python
+# boileroom/models/{name}/__init__.py
+
+def __getattr__(name: str):
+    if name == "MyModel":
+        from .{name} import MyModel
+        return MyModel
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+__all__ = ["MyModel"]
+```
+
+**Export from the models index** -- add the lazy import to `boileroom/models/__init__.py`.
+
+**Export from the top-level package** -- add the lazy import to `boileroom/__init__.py`:
+
+```python
+if name == "MyModel":
+    from .models import MyModel
+    return MyModel
+```
+
+And add `"MyModel"` to the `__all__` list.
+
+After this, users can write:
+
+```python
+from boileroom import MyModel
+```
+
+## Step 7: Add tests
+
+Create `tests/{name}/test_{name}.py`. Follow the existing test patterns:
+
+```python
+# tests/{name}/test_{name}.py
+
+import numpy as np
+import pytest
+from modal import enable_output
+
+from boileroom import MyModel
+from boileroom.models.{name}.types import MyModelOutput
+from biotite.structure import AtomArray, rmsd, superimpose
+
+
+test_sequence = "MKTVRQERLKSIVRI"
+
+
+@pytest.fixture(scope="module")
+def mymodel():
+    """Module-scoped fixture so the model is shared across tests."""
+    with enable_output():
+        yield MyModel(backend="modal")
+
+
+def test_fold_single_sequence(mymodel):
+    result = mymodel.fold(test_sequence)
+    assert isinstance(result, MyModelOutput)
+    assert result.atom_array is not None
+    assert len(result.atom_array) == 1
+    assert isinstance(result.atom_array[0], AtomArray)
+    assert result.metadata.model_name == "MyModel"
+
+
+def test_fold_matches_reference(mymodel):
+    result = mymodel.fold(test_sequence)
+    # Load reference structure
+    # Compare with tolerance
+    # assert rmsd_value < 1.0
+```
+
+Key testing conventions:
+
+- Use `scope="module"` fixtures for model instances so the container is reused across tests.
+- Store reference outputs in `tests/data/{name}/` for regression testing.
+- Compare structures using RMSD with a tolerance (typically < 1.0 angstrom for self-consistency tests).
+- For confidence scores, use relative error tolerances.
+- Wrap the model instantiation with `enable_output()` to see Modal container logs during CI.
+
+## Step 8: Docker image for Apptainer
+
+To support the Apptainer backend, you need a Docker image that can run your model locally or on HPC clusters.
+
+**Create a Dockerfile** at `boileroom/models/{name}/Dockerfile`:
+
+```dockerfile
+ARG BASE_IMAGE=docker.io/jakublala/boileroom-base:latest
+FROM ${BASE_IMAGE}
+
+ARG ENV_FILE=environment.yml
+COPY ${ENV_FILE} /tmp/environment.yml
+USER root
+RUN chown ${MAMBA_USER}:${MAMBA_USER} /tmp/environment.yml
+USER ${MAMBA_USER}
+
+ARG TORCH_WHEEL_INDEX=https://download.pytorch.org/whl/cu118
+ENV PIP_EXTRA_INDEX_URL=${TORCH_WHEEL_INDEX}
+
+RUN micromamba env update -n base -f /tmp/environment.yml \
+    && micromamba clean --all --yes \
+    && rm /tmp/environment.yml
+```
+
+**Create `environment.yml`** listing conda/pip dependencies for your model.
+
+**Create `config.yaml`** specifying supported CUDA versions:
+
+```yaml
+supported_cuda:
+  - "12.6"
+```
+
+The build script at `scripts/images/build_model_images.py` reads these files and pushes images to `docker.io/jakublala/boileroom-{name}:{tag}`.
+
+## Checklist
+
+Before submitting your PR, verify:
+
+- [ ] `types.py` -- Output dataclass follows `StructurePrediction` or `EmbeddingPrediction` protocol
+- [ ] `core.py` -- Implements `_load()`, `_initialize()`, `fold()`/`embed()`, and `_convert_outputs()`
+- [ ] `core.py` -- Defines `DEFAULT_CONFIG` and `STATIC_CONFIG_KEYS`
+- [ ] `image.py` -- Modal image extends `base_image` with model-specific dependencies
+- [ ] `{name}.py` -- Modal wrapper uses lazy imports in `@modal.enter()`
+- [ ] `{name}.py` -- High-level wrapper supports both `modal` and `apptainer` backends
+- [ ] `__init__.py` -- Lazy exports at model, models, and top-level package
+- [ ] Tests pass against the Modal backend
+- [ ] Dockerfile and environment.yml build successfully
+- [ ] `config.yaml` lists supported CUDA versions

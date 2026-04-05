@@ -165,6 +165,15 @@
               "boileroom-api/reference/configuration",
               "boileroom-api/reference/backends"
             ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "boileroom-api/development/contributing",
+              "boileroom-api/development/architecture",
+              "boileroom-api/development/adding-a-model",
+              "boileroom-api/development/adding-a-backend"
+            ]
           }
         ]
       }

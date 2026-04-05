@@ -1,0 +1,117 @@
+---
+title: "Adding a Backend"
+description: "How to implement a new execution backend for boileroom."
+---
+
+## Overview
+
+Boileroom uses a backend abstraction to decouple model logic from execution infrastructure. If you want to run models on a new platform (a cloud provider, an HPC scheduler, a local Docker runtime, etc.), you need to implement a new backend.
+
+This guide walks you through the process.
+
+## The Backend base class
+
+Every backend extends the abstract base class in `boileroom/backend/base.py`:
+
+```python
+class Backend(ABC):
+    def __init__(self) -> None:
+        self._is_running = False
+        self._atexit_hook = None
+
+    def start(self) -> None:  # Calls startup(), registers atexit
+    def stop(self) -> None:   # Calls shutdown(), unregisters atexit
+
+    @abstractmethod
+    def startup(self) -> None: ...
+    @abstractmethod
+    def shutdown(self) -> None: ...
+```
+
+The `start()` and `stop()` methods handle lifecycle bookkeeping for you. Your job is to implement `startup()` and `shutdown()` with the actual resource management logic.
+
+## Step 1: Create your backend module
+
+Create a new file at `boileroom/backend/{name}.py`. Import and subclass `Backend`:
+
+```python
+from boileroom.backend.base import Backend
+
+class MyBackend(Backend):
+    def startup(self) -> None:
+        # Acquire resources: start containers, open connections, etc.
+        ...
+
+    def shutdown(self) -> None:
+        # Release resources: stop containers, close connections, etc.
+        ...
+```
+
+In `startup()`, you should acquire whatever resources your platform needs -- spinning up containers, establishing connections, or provisioning compute. In `shutdown()`, you clean everything up. The base class registers an `atexit` hook so that `shutdown()` runs even if the process exits unexpectedly.
+
+## Step 2: Expose prediction methods
+
+Your backend must be able to instantiate a core algorithm class and call its methods remotely (or locally, depending on your platform). The backend's `model` attribute must expose the prediction methods (such as `fold` and `embed`) so that `ModelWrapper._call_backend_method()` can invoke them.
+
+How you achieve this depends on your platform. Look at the two existing backends for patterns:
+
+### ModalBackend
+
+The Modal backend uses a `ModalAppManager` singleton to maintain a shared Modal app context. It creates a Modal remote class using `.with_options(gpu=device)` and calls methods via `.remote()`:
+
+```python
+# Simplified illustration
+self.model = RemoteClass.with_options(gpu=device)
+result = self.model.fold.remote(sequence)
+```
+
+### ApptainerBackend
+
+The Apptainer backend pulls a Docker image, starts an Apptainer container as an HTTP microservice, and communicates via REST. It includes a health check polling loop with a 300-second timeout to wait for the container to become ready:
+
+```python
+# Simplified illustration
+self._start_container(image_uri)
+self._wait_for_health(timeout=300)
+result = self._post("/fold", {"sequence": sequence})
+```
+
+## Step 3: Integrate with model wrappers
+
+Each model wrapper's `__init__` method selects its backend based on a `backend_type` string. You need to add an `elif` branch for your backend:
+
+```python
+class MyModelWrapper(ModelWrapper):
+    def __init__(self, backend_type: str, ...):
+        if backend_type == "modal":
+            from boileroom.backend.modal import ModalBackend
+            self.backend = ModalBackend(...)
+        elif backend_type == "apptainer":
+            from boileroom.backend.apptainer import ApptainerBackend
+            self.backend = ApptainerBackend(...)
+        elif backend_type == "your_backend":
+            from boileroom.backend.your_backend import YourBackend
+            self.backend = YourBackend(...)
+```
+
+Import your backend lazily (inside the `elif` block) to avoid pulling in platform-specific dependencies when they are not needed.
+
+## Step 4: Add tests
+
+Add your backend as an option in `tests/conftest.py` under the `--backend` pytest flag. This lets you run the existing test suite against your backend:
+
+```bash
+uv run pytest --backend your_backend -v
+```
+
+Make sure the core model tests pass with your backend before opening a PR.
+
+## Checklist
+
+Before you submit your backend, verify the following:
+
+- [ ] Subclass `Backend` and implement both `startup()` and `shutdown()`
+- [ ] Backend's `model` attribute exposes the prediction methods that `ModelWrapper._call_backend_method()` expects
+- [ ] Import your backend lazily in each model wrapper's `__init__`
+- [ ] Add your backend to the `choices` tuple in the `--backend` option in `tests/conftest.py`
+- [ ] All existing tests pass when run with your backend

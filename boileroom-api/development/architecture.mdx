@@ -1,0 +1,110 @@
+---
+title: "Architecture Overview"
+description: "Understand the three-layer architecture that powers boileroom's backend-agnostic protein modeling framework."
+---
+
+## Overview
+
+Boileroom is built around a three-layer architecture that separates pure model logic from execution backends and user-facing APIs. This design lets you run the same protein models locally, on Modal's serverless GPUs, or inside Apptainer containers without changing your application code.
+
+```
+┌─────────────────────────────────────────────────────┐
+│            Layer 3: High-Level Wrappers              │
+│  ESMFold  |  ESM2  |  Chai1  |  Boltz2              │
+│  (ModelWrapper subclasses, context managers)          │
+│  backend="modal" | backend="apptainer"               │
+├─────────────────────────────────────────────────────┤
+│            Layer 2: Backend Layer                     │
+│  ModalBackend            |   ApptainerBackend         │
+│  ModalAppManager         |   HTTP microservice        │
+│  @app.cls() remote GPU   |   Docker/Apptainer image   │
+├─────────────────────────────────────────────────────┤
+│            Layer 1: Core Algorithms                   │
+│  ESMFoldCore | ESM2Core | Chai1Core | Boltz2Core      │
+│  (Algorithm subclasses, pure Python, no backend deps) │
+│  _load() | update_config() | _resolve_device()        │
+└─────────────────────────────────────────────────────┘
+```
+
+## Layer 1: Core Algorithms
+
+At the foundation, you have the `Algorithm` base class defined in `boileroom/base.py`. Every model inherits from it and implements the actual inference logic in pure Python -- no backend dependencies required.
+
+There are two algorithm families:
+
+- **`FoldingAlgorithm`** -- for structure prediction models (ESMFold, Chai-1, Boltz-2)
+- **`EmbeddingAlgorithm`** -- for embedding models (ESM-2)
+
+Each concrete core class (e.g., `ESMFoldCore`, `Chai1Core`, `Boltz2Core`, `ESM2Core`) lives in a `core.py` file within its model directory and is responsible for:
+
+- Loading model weights via `_load()`
+- Defining a `DEFAULT_CONFIG` dict and `STATIC_CONFIG_KEYS` that cannot change after initialization
+- Resolving compute devices with `_resolve_device()`
+- Merging per-call options into the config with `_merge_options()`
+- Running inference and converting outputs into typed dataclasses
+
+Because cores have zero knowledge of backends, you can instantiate and test them directly in any Python environment that has the model's dependencies installed.
+
+## Layer 2: Backend Layer
+
+The `Backend` base class in `boileroom/backend/base.py` defines a lifecycle protocol: `startup()` and `shutdown()`, managed automatically through `start()` / `stop()` with `atexit` cleanup.
+
+### ModalBackend
+
+The `ModalBackend` (in `backend/modal.py`) runs core algorithms on Modal's serverless infrastructure. It relies on a `ModalAppManager` singleton that provides a reference-counted shared `modal.App("boileroom")` context. When you create multiple model wrappers in the same process, they all share a single Modal app.
+
+Per-model Modal wrapper classes (`ModalESMFold`, `ModalChai1`, `ModalBoltz2`, `ModalESM2`) are decorated with `@app.cls()` specifying the container image, GPU type, timeout, and volumes. The core class is imported lazily inside `@modal.enter()` so that heavy model dependencies are only loaded in the remote container, not in your local process.
+
+Each Modal wrapper is instantiated with `.with_options(gpu=device)` to select the appropriate GPU at runtime.
+
+### ApptainerBackend
+
+The `ApptainerBackend` (in `backend/apptainer.py`) runs the core algorithm inside an Apptainer (formerly Singularity) container as an HTTP microservice. It:
+
+1. Pulls Docker images from `docker.io/jakublala/boileroom-{model}:{tag}`
+2. Starts a server process inside the container
+3. Health-checks the server with a 300-second timeout
+4. Communicates with the running model via REST calls to localhost
+
+The core class is specified as a string path (e.g., `"boileroom.models.esm.core.ESMFoldCore"`) so it can be resolved inside the container environment.
+
+## Layer 3: High-Level Wrappers
+
+The user-facing classes -- `ESMFold`, `ESM2`, `Chai1`, and `Boltz2` -- all inherit from `ModelWrapper` in `boileroom/base.py`. Each lives in its own file (e.g., `models/esm/esmfold.py`).
+
+When you instantiate a wrapper, you pass a `backend` argument:
+
+```python
+from boileroom.models.esm import ESMFold
+
+# Run on Modal's serverless GPUs
+model = ESMFold(backend="modal")
+
+# Run inside an Apptainer container (with optional tag)
+model = ESMFold(backend="apptainer:latest")
+```
+
+The `parse_backend()` method in `ModelWrapper` handles the `"apptainer:tag"` syntax, splitting the string to extract a container image tag.
+
+Every wrapper supports context manager usage via `__enter__` / `__exit__`, and delegates all method calls to the backend through `_call_backend_method()`.
+
+## File Layout
+
+Each model follows a consistent directory structure:
+
+```
+models/{name}/
+    __init__.py
+    core.py      # {Name}Core -- heavy, model-specific algorithm logic
+    {name}.py    # High-level wrapper + Modal wrapper class
+    types.py     # Output dataclass ({Name}Output)
+    image.py     # Modal image definition
+```
+
+## Key Design Decisions
+
+- **Backend-agnostic cores.** Core algorithms carry no backend dependencies. This makes them portable across environments and straightforward to unit test.
+- **Reference-counted Modal app.** The `ModalAppManager` singleton ensures that multiple model wrappers share a single `modal.App` context, avoiding redundant app creation.
+- **Lazy imports in Modal containers.** Core classes are imported inside `@modal.enter()` so your local process never needs to install heavy model dependencies like PyTorch or ESM.
+- **Static vs. dynamic config.** Each algorithm defines `STATIC_CONFIG_KEYS` that are locked at initialization and `DEFAULT_CONFIG` values that can be overridden per-call via options passed to `_merge_options()`.
+- **Container tag syntax.** The `"apptainer:tag"` shorthand lets you pin specific container image versions without additional constructor parameters.
