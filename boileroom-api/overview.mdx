@@ -5,6 +5,10 @@ description: "Python API reference for the boileroom protein prediction library 
 
 boileroom provides a unified Python interface to run protein prediction models (structure prediction and embeddings) on serverless (Modal) or local (Apptainer) GPU infrastructure. You call the same methods regardless of backend — the models and their outputs are the primary interface.
 
+<Warning>
+These boileroom docs describe the `v0.3` architecture and contributor workflow. If you are working against an older checkout or release, some files and development steps may differ.
+</Warning>
+
 <Info>
 boileroom powers [BAGEL](/bagel-api/oracles/oracle)'s oracle inference. When you create an oracle like `bg.oracles.ESMFold(use_modal=True)` in BAGEL, boileroom handles model loading, GPU execution, and dependency isolation behind the scenes. See the [BAGEL Oracles documentation](/bagel-api/oracles/oracle) for how oracles integrate with energy terms.
 </Info>

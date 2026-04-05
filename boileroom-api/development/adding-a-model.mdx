@@ -7,6 +7,10 @@ description: "Step-by-step guide for integrating a new protein prediction model 
 
 This guide walks you through adding a new model to boileroom. You will create a set of files that follow the same three-layer architecture used by every existing model (ESMFold, ESM-2, Chai-1, Boltz-2): a core algorithm, a typed output, a Modal image, a Modal wrapper, and a high-level user-facing class.
 
+<Warning>
+This page is written for boileroom `v0.3`. The contributor workflow is currently being reshaped around the new registry and contract-test architecture, so older branches may not match this guide exactly.
+</Warning>
+
 By the end, your model will work with every backend (Modal, Apptainer) and be accessible through the same interface as the built-in models.
 
 ## File structure
