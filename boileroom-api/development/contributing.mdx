@@ -75,6 +75,14 @@ All checks must pass before your PR can be merged.
 4. Bump the version in `pyproject.toml`. This is required by CI and your pipeline will fail without it.
 5. Write a PR description that explains **what** you changed and **why**.
 
+## Release and versioning
+
+- Docker image version tags follow `project.version` in `pyproject.toml`.
+- Merging to `main` triggers the Docker image workflow, which builds a temporary `sha-<commit>` validation tag, verifies it, and then promotes it to `latest` and the current package version on Docker Hub.
+- PyPI publication is separate and only happens when a GitHub release is published.
+- That means Docker Hub can be the earlier staged release channel, while PyPI remains the later Python package release step.
+- If you bump `project.version`, you are also changing the public versioned Docker tags that will be produced from `main`.
+
 ## Project structure
 
 ```
