@@ -81,10 +81,10 @@ from boileroom.models.esm import ESMFold
 model = ESMFold(backend="modal")
 
 # Run inside an Apptainer container (with optional tag)
-model = ESMFold(backend="apptainer:latest")
+model = ESMFold(backend="apptainer")
 ```
 
-The `parse_backend()` method in `ModelWrapper` handles the `"apptainer:tag"` syntax, splitting the string to extract a container image tag.
+The `parse_backend()` method in `ModelWrapper` handles the `"apptainer:tag"` syntax, splitting the string to extract a container image tag. When you omit the tag, the runtime uses the installed boileroom package version.
 
 Every wrapper supports context manager usage via `__enter__` / `__exit__`, and delegates all method calls to the backend through `_call_backend_method()`.
 

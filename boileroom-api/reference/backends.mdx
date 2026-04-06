@@ -50,17 +50,17 @@ Apptainer (formerly Singularity) runs models in a container on your local machin
 
 ### Tag syntax
 
-By default, the Apptainer backend uses the `latest` Docker image tag. You can specify a different tag:
+By default, the Apptainer backend uses the installed Boileroom package version on the default CUDA line. You can still specify an explicit image tag when needed:
 
 ```python
-# Use the latest image
+# Use the image tag matching the installed boileroom package version
 model = ESMFold(backend="apptainer")
 
-# Equivalent to above
-model = ESMFold(backend="apptainer:latest")
-
 # Use a specific version tag
-model = ESMFold(backend="apptainer:v1.0.0")
+model = ESMFold(backend="apptainer:0.3.0")
+
+# Use an explicit CUDA-qualified image tag
+model = ESMFold(backend="apptainer:cuda11.8-0.3.0")
 ```
 
 ### Local execution

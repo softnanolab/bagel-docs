@@ -406,7 +406,7 @@ To support the Apptainer backend, you need a Docker image that can run your mode
 **Create a Dockerfile** at `boileroom/models/{name}/Dockerfile`:
 
 ```dockerfile
-ARG BASE_IMAGE=docker.io/jakublala/boileroom-base:latest
+ARG BASE_IMAGE=docker.io/jakublala/boileroom-base:local
 FROM ${BASE_IMAGE}
 
 ARG ENV_FILE=environment.yml
