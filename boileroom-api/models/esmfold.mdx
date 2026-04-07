@@ -11,7 +11,7 @@ ESMFold predicts protein 3D structure directly from a single amino acid sequence
 from boileroom import ESMFold
 
 model = ESMFold(backend="modal")
-result = model.fold("MKTVRQERLKSIVRI")
+result = model.fold("MKTVRQERLKSIVRI", options={"include_fields": ["plddt"]})
 
 print(result.atom_array)   # list of Biotite AtomArray objects
 print(result.plddt.shape)  # per-residue confidence scores

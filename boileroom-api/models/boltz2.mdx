@@ -11,7 +11,7 @@ Boltz-2 is a diffusion-based protein structure prediction model with built-in MS
 from boileroom import Boltz2
 
 model = Boltz2(backend="modal")
-result = model.fold("MKTVRQERLKSIVRI")
+result = model.fold("MKTVRQERLKSIVRI", options={"include_fields": ["plddt", "confidence"]})
 
 print(result.atom_array)  # list of Biotite AtomArray objects
 print(result.plddt)       # per-residue confidence scores
@@ -144,7 +144,10 @@ To disable caching, set `config={"msa_cache_enabled": False}`.
 Separate chains with `":"` in the sequence string:
 
 ```python
-result = model.fold("MKTVRQERLKSIVRI:LERSKEPVSGAQLAEE")
+result = model.fold(
+    "MKTVRQERLKSIVRI:LERSKEPVSGAQLAEE",
+    options={"include_fields": ["confidence"]},
+)
 
 print(result.atom_array)   # structure with both chains
 print(result.confidence)   # includes inter-chain metrics
